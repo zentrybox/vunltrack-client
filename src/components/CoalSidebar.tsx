@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -20,7 +20,6 @@ interface CoalSidebarProps {
 
 export default function CoalSidebar({ tenantName, userName, items }: CoalSidebarProps) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems = useMemo(
     () =>
@@ -45,7 +44,7 @@ export default function CoalSidebar({ tenantName, userName, items }: CoalSidebar
         <h1 className="text-xl font-semibold text-gray-900">Network Command Center</h1>
         <p className="text-sm text-gray-600">Active perimeter monitoring</p>
       </div>
-      <div className="mt-8 flex-1 space-y-2 overflow-y-auto px-3 pb-12">
+      <div className="mt-8 flex-1 space-y-2 overflow-y-auto px-3 pb-12 min-h-0">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href || (pathname ?? "").startsWith(`${item.href}/`);
@@ -60,7 +59,6 @@ export default function CoalSidebar({ tenantName, userName, items }: CoalSidebar
               )}
               data-active={isActive}
               aria-current={isActive ? "page" : undefined}
-              onClick={() => setMobileOpen(false)}
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-gray-100 text-xs font-semibold text-gray-600">
                 {item.initials || "·"}
@@ -86,34 +84,8 @@ export default function CoalSidebar({ tenantName, userName, items }: CoalSidebar
   );
 
   return (
-    <>
-      <aside className="hidden h-screen w-[280px] flex-shrink-0 border-r border-gray-200 bg-white text-gray-900 lg:flex">
-        <div className="flex h-full w-full flex-col">{content}</div>
-      </aside>
-      <div className="lg:hidden">
-        <button
-          type="button"
-          aria-label="Toggle navigation"
-          className="absolute left-4 top-4 z-50 rounded-md border border-gray-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-gray-700 shadow-sm"
-          onClick={() => setMobileOpen((prev) => !prev)}
-        >
-          {mobileOpen ? "Close" : "Menu"}
-        </button>
-        <div
-          className={cn(
-            "fixed inset-y-0 left-0 z-40 w-[260px] border-r border-gray-200 bg-white text-gray-900 transition-transform duration-300",
-            mobileOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-        >
-          <div className="flex h-full flex-col">{content}</div>
-        </div>
-        {mobileOpen ? (
-          <div
-            className="fixed inset-0 z-30 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-        ) : null}
-      </div>
-    </>
+    <aside className="hidden min-h-screen w-[280px] flex-shrink-0 border-r border-gray-200 bg-white text-gray-900 lg:flex">
+      <div className="flex min-h-screen w-full flex-col">{content}</div>
+    </aside>
   );
 }
