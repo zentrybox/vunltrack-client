@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# coal series packages
+/packages
+
+# project local config
+BACKEND_ENDPOINTS.md
