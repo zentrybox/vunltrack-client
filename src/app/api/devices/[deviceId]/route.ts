@@ -5,14 +5,15 @@ import { getSession } from "@/lib/auth";
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { deviceId: string } },
+  context: { params: Promise<{ deviceId: string }> },
 ) {
+  const { deviceId } = await context.params;
   const session = await getSession();
   if (!session.tenantId || !session.token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
   try {
-    await deleteDevice(session.tenantId, params.deviceId, session.token);
+    await deleteDevice(session.tenantId, deviceId, session.token);
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;

@@ -4,11 +4,23 @@ import {
   CreateCollaboratorPayload,
   CreateDevicePayload,
   DashboardMetrics,
+  IncidentHistoryEntry,
+  IncidentRecord,
+  IncidentStatus,
   DeviceRecord,
+  MetricsSnapshot,
   LoginResponse,
+  ReportSummary,
   RegisterRootPayload,
+  ScanDetailResponse,
+  ScanSummary,
+  ScheduledScanRecord,
+  SchedulePayload,
   SubscriptionSimulation,
   SubscriptionStatus,
+  StartScanPayload,
+  StartScanResponse,
+  UpdateIncidentPayload,
   VulnerabilityQueueItem,
 } from "./types";
 
@@ -94,6 +106,43 @@ async function request<T>(
   }
 
   return JSON.parse(text) as T;
+}
+
+const INCIDENT_STATUS_VALUES: IncidentStatus[] = [
+  "OPEN",
+  "INVESTIGATING",
+  "CONTAINED",
+  "RESOLVED",
+  "DISMISSED",
+];
+
+function normalizeIncidentStatus(value: unknown): IncidentStatus {
+  if (typeof value !== "string" || value.length === 0) {
+    return "OPEN";
+  }
+
+  const upper = value.toUpperCase() as IncidentStatus;
+  return INCIDENT_STATUS_VALUES.includes(upper) ? upper : "OPEN";
+}
+
+function normalizeIncidentRecord(incident: IncidentRecord): IncidentRecord {
+  return {
+    ...incident,
+    status: normalizeIncidentStatus(incident.status),
+  };
+}
+
+function normalizeIncidentHistoryEntry(
+  entry: IncidentHistoryEntry,
+): IncidentHistoryEntry {
+  const format = (value: IncidentHistoryEntry["fromStatus"]) =>
+    typeof value === "string" ? value.toUpperCase() : value;
+
+  return {
+    ...entry,
+    fromStatus: format(entry.fromStatus),
+    toStatus: format(entry.toStatus),
+  };
 }
 
 export interface LoginPayload {
@@ -221,9 +270,10 @@ export async function getDashboardMetrics(
       acc.highFindings += device.highFindings ?? 0;
       acc.mediumFindings += device.mediumFindings ?? 0;
       acc.lowFindings += device.lowFindings ?? 0;
-      if (device.updatedAt) {
-        if (!acc.lastScanAt || new Date(device.updatedAt) > new Date(acc.lastScanAt)) {
-          acc.lastScanAt = device.updatedAt;
+      if (device.lastScanAt ?? device.updatedAt) {
+        const candidate = device.lastScanAt ?? device.updatedAt!;
+        if (!acc.lastScanAt || new Date(candidate) > new Date(acc.lastScanAt)) {
+          acc.lastScanAt = candidate;
         }
       }
       return acc;
@@ -289,4 +339,180 @@ export async function getVulnerabilityQueue(
 
     return items;
   });
+}
+
+export async function getMetricsSnapshot(): Promise<MetricsSnapshot> {
+  return request<MetricsSnapshot>("/metrics", { method: "GET" });
+}
+
+export async function startScan(
+  token: string,
+  payload: StartScanPayload,
+): Promise<StartScanResponse> {
+  return request<StartScanResponse>("/api/scans/start", {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listScans(
+  tenantId: string,
+  token: string,
+): Promise<ScanSummary[]> {
+  const result = await request<{ data?: ScanSummary[] } | ScanSummary[]>(
+    `/api/scans?tenantId=${tenantId}`,
+    {
+      method: "GET",
+      token,
+    },
+  );
+
+  if (Array.isArray(result)) {
+    return result;
+  }
+
+  return result.data ?? [];
+}
+
+export async function getScanDetail(
+  scanId: string,
+  token: string,
+): Promise<ScanDetailResponse> {
+  return request<ScanDetailResponse>(`/api/scans/${scanId}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function listIncidents(
+  tenantId: string,
+  token: string,
+): Promise<IncidentRecord[]> {
+  const result = await request<{ data?: IncidentRecord[] } | IncidentRecord[]>(
+    `/api/incidents?tenantId=${tenantId}`,
+    {
+      method: "GET",
+      token,
+    },
+  );
+
+  const incidents = Array.isArray(result) ? result : result.data ?? [];
+
+  return incidents.map((incident) => normalizeIncidentRecord(incident));
+}
+
+export async function updateIncident(
+  incidentId: string,
+  token: string,
+  payload: UpdateIncidentPayload,
+): Promise<IncidentRecord> {
+  const incident = await request<IncidentRecord>(`/api/incidents/${incidentId}`, {
+    method: "PATCH",
+    token,
+    body: JSON.stringify(payload),
+  });
+
+  return normalizeIncidentRecord(incident);
+}
+
+export async function getIncidentHistory(
+  incidentId: string,
+  token: string,
+): Promise<IncidentHistoryEntry[]> {
+  const result = await request<
+    | IncidentHistoryEntry[]
+    | { data?: IncidentHistoryEntry[]; history?: IncidentHistoryEntry[] }
+  >(`/api/incidents/${incidentId}/history`, {
+    method: "GET",
+    token,
+  });
+
+  let entries: IncidentHistoryEntry[] = [];
+
+  if (Array.isArray(result)) {
+    entries = result;
+  } else if (result?.history && Array.isArray(result.history)) {
+    entries = result.history;
+  } else if (result?.data && Array.isArray(result.data)) {
+    entries = result.data;
+  }
+
+  return entries.map((entry) => normalizeIncidentHistoryEntry(entry));
+}
+
+export async function listSchedules(
+  tenantId: string,
+  token: string,
+): Promise<ScheduledScanRecord[]> {
+  const result = await request<{
+    data?: ScheduledScanRecord[];
+  } | ScheduledScanRecord[]>(`/api/tenants/${tenantId}/schedules`, {
+    method: "GET",
+    token,
+  });
+
+  if (Array.isArray(result)) {
+    return result;
+  }
+
+  return result.data ?? [];
+}
+
+export async function createSchedule(
+  tenantId: string,
+  token: string,
+  payload: SchedulePayload,
+): Promise<ScheduledScanRecord> {
+  return request<ScheduledScanRecord>(`/api/tenants/${tenantId}/schedules`, {
+    method: "POST",
+    token,
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateSchedule(
+  tenantId: string,
+  scheduleId: string,
+  token: string,
+  payload: SchedulePayload,
+): Promise<ScheduledScanRecord> {
+  return request<ScheduledScanRecord>(
+    `/api/tenants/${tenantId}/schedules/${scheduleId}`,
+    {
+      method: "PATCH",
+      token,
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function deleteSchedule(
+  tenantId: string,
+  scheduleId: string,
+  token: string,
+): Promise<void> {
+  await request(`/api/tenants/${tenantId}/schedules/${scheduleId}`, {
+    method: "DELETE",
+    token,
+  });
+}
+
+export async function listReports(
+  tenantId: string,
+  token: string,
+): Promise<ReportSummary[]> {
+  const result = await request<{ data?: ReportSummary[] } | ReportSummary[]>(
+    `/api/tenants/${tenantId}/reports`,
+    {
+      method: "GET",
+      token,
+    },
+  );
+
+  if (Array.isArray(result)) {
+    return result;
+  }
+
+  return result.data ?? [];
 }

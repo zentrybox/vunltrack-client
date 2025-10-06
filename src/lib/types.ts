@@ -31,12 +31,22 @@ export interface RegisterRootPayload {
   password?: string;
 }
 
+export type DeviceState = "ACTIVE" | "INACTIVE" | "RETIRED";
+
+export type DeviceScanStatus = "OK" | "ISSUES" | "FAILED";
+
 export interface DeviceRecord {
   id: string;
   tenantId: string;
   vendor: string;
   product: string;
   version: string;
+  name?: string | null;
+  ip?: string | null;
+  serial?: string;
+  state?: DeviceState;
+  lastScanAt?: string | null;
+  lastScanStatus?: DeviceScanStatus | null;
   createdAt: string;
   updatedAt?: string;
   criticalFindings?: number;
@@ -49,6 +59,10 @@ export interface CreateDevicePayload {
   vendor: string;
   product: string;
   version: string;
+  name?: string;
+  ip?: string;
+  serial?: string;
+  state?: DeviceState;
 }
 
 export interface CollaboratorRecord {
@@ -130,6 +144,115 @@ export interface VulnerabilityQueueItem {
   device: string;
   detectedAt: string;
   status: "OPEN" | "IN_PROGRESS" | "RESOLVED";
+}
+
+export interface MetricsSnapshot {
+  averageScanDurationMs: number;
+  deviceSuccessRatio: number;
+  cveDetectionRate: number;
+}
+
+export type ScanStatus = "running" | "completed" | "failed" | "cancelled";
+
+export interface ScanSummary {
+  id: string;
+  tenantId: string;
+  startedAt: string;
+  finishedAt?: string | null;
+  status: ScanStatus;
+  totalDevices: number;
+  completedDevices: number;
+  successful: number;
+  withIssues: number;
+  createdBy: string;
+}
+
+export type ScanResultStatus = "pending" | "running" | "completed" | "failed";
+
+export interface ScanResultRecord {
+  id: string;
+  scanId: string;
+  deviceId: string;
+  status: ScanResultStatus;
+  cveCount: number;
+  cves: string[];
+  startedAt: string;
+  finishedAt?: string | null;
+}
+
+export interface ScanDetailResponse {
+  scan: ScanSummary;
+  results: ScanResultRecord[];
+}
+
+export interface StartScanPayload {
+  tenantId: string;
+  createdBy: string;
+  devices: Array<{ deviceId: string }>;
+}
+
+export interface StartScanResponse {
+  scanId: string;
+}
+
+export type IncidentStatus =
+  | "OPEN"
+  | "INVESTIGATING"
+  | "CONTAINED"
+  | "RESOLVED"
+  | "DISMISSED";
+
+export interface IncidentRecord {
+  id: string;
+  scanId: string;
+  deviceId: string;
+  cveId: string;
+  status: IncidentStatus;
+  assignedTo?: string | null;
+  tenantId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IncidentHistoryEntry {
+  id: string;
+  incidentId: string;
+  changedBy: string;
+  fromStatus: IncidentStatus | string;
+  toStatus: IncidentStatus | string;
+  timestamp: string;
+  comment?: string | null;
+}
+
+export interface UpdateIncidentPayload {
+  status?: IncidentStatus;
+  assignedTo?: string | null;
+  comment?: string;
+}
+
+export interface ScheduledScanRecord {
+  id: string;
+  tenantId: string;
+  name: string;
+  cron: string;
+  active: boolean;
+  lastRunAt?: string | null;
+  nextRunAt?: string | null;
+  createdAt: string;
+}
+
+export interface SchedulePayload {
+  name: string;
+  cron: string;
+  active?: boolean;
+  deviceIds?: string[];
+}
+
+export interface ReportSummary {
+  id: string;
+  name: string;
+  format: string;
+  generatedAt: string;
 }
 
 export interface ApiErrorShape {

@@ -1,10 +1,11 @@
 'use client';
 
+import { useRouter } from "next/navigation";
+import type { ComponentProps } from "react";
+
 import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
-import HeatmapGrid from "@/components/HeatmapGrid";
-import RadarWidget from "@/components/RadarWidget";
 import StatusBadge from "@/components/StatusBadge";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn, formatDateLabel } from "@/lib/utils";
@@ -36,14 +37,66 @@ const statCards = [
 	},
 ];
 
-const toneTextClass: Record<(typeof statCards)[number]["tone"], string> = {
+const toneTextClass: Record<
+	"info" | "critical" | "warning" | "safe" | "neutral",
+	string
+> = {
 	info: "text-blue-600",
 	critical: "text-red-600",
 	warning: "text-amber-600",
+	safe: "text-emerald-600",
+	neutral: "text-gray-600",
 };
 
 export default function DashboardPage() {
-	const { metrics, queue, loading, error } = useDashboard();
+	const router = useRouter();
+	const { metrics, queue, scans, incidents, systemMetrics, loading, error } =
+		useDashboard();
+
+	const systemTiles = [
+		{
+			id: "avg-duration",
+			label: "Avg scan duration",
+			value: systemMetrics
+				? `${Math.round(systemMetrics.averageScanDurationMs / 1000)}s`
+				: "—",
+			tone: "info" as const,
+			description: "Rolling 24h window",
+		},
+		{
+			id: "success-ratio",
+			label: "Device success ratio",
+			value: systemMetrics
+				? `${Math.round(systemMetrics.deviceSuccessRatio * 100)}%`
+				: "—",
+			tone: "safe" as const,
+			description: "Runs completed without issues",
+		},
+		{
+			id: "cve-detection",
+			label: "CVE detection rate",
+			value: systemMetrics
+				? `${Math.round(systemMetrics.cveDetectionRate * 100)}%`
+				: "—",
+			tone: "warning" as const,
+			description: "Devices reporting new exposures",
+		},
+	];
+
+	const scanStatusTone: Record<string, ComponentProps<typeof StatusBadge>["tone"]> = {
+		running: "info",
+		completed: "safe",
+		failed: "critical",
+		cancelled: "neutral",
+	};
+
+	const incidentStatusTone: Record<string, ComponentProps<typeof StatusBadge>["tone"]> = {
+		OPEN: "critical",
+		INVESTIGATING: "warning",
+		CONTAINED: "info",
+		RESOLVED: "safe",
+		DISMISSED: "neutral",
+	};
 
 	return (
 		<div className="space-y-8">
@@ -78,6 +131,146 @@ export default function DashboardPage() {
 
 			<section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
 				<CoalCard
+					title="Recent scans"
+					subtitle="Monitor cadence and completion rates"
+					action={
+						<CoalButton
+							variant="secondary"
+							size="sm"
+							onClick={() => router.push("/scans")}
+						>
+							View scans
+						</CoalButton>
+					}
+				>
+					<CoalTable
+						data={scans}
+						isLoading={loading}
+						columns={[
+							{
+								key: "id",
+								header: "Scan",
+								render: (scan) => (
+									<div className="space-y-1">
+										<p className="text-sm font-semibold text-gray-900">{scan.id}</p>
+										<p className="text-xs text-gray-500">
+											Started {formatDateLabel(scan.startedAt)}
+										</p>
+									</div>
+								),
+							},
+							{
+								key: "status",
+								header: "Status",
+								render: (scan) => (
+									<StatusBadge tone={scanStatusTone[scan.status] ?? "neutral"}>
+										{scan.status}
+									</StatusBadge>
+								),
+							},
+							{
+								key: "success",
+								header: "Success",
+								render: (scan) => (
+									<span className="text-xs font-semibold text-gray-800">
+										{scan.successful}/{scan.totalDevices}
+									</span>
+								),
+							},
+							{
+								key: "issues",
+								header: "With issues",
+								align: "right",
+								render: (scan) => (
+									<span className="text-xs text-amber-700">{scan.withIssues}</span>
+								),
+							},
+						]}
+						emptyState="No scans have run yet. Start a scan to populate history."
+					/>
+				</CoalCard>
+				<CoalCard title="System health" subtitle="Backend performance indicators">
+					<div className="space-y-4">
+						{systemTiles.map((tile) => (
+							<div key={tile.id} className="rounded-md border border-gray-200 bg-gray-50 p-4">
+								<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">
+									{tile.label}
+								</p>
+								<div className="mt-2 flex items-center justify-between">
+									<p className={cn("text-2xl font-semibold", toneTextClass[tile.tone])}>
+										{tile.value}
+									</p>
+									<StatusBadge tone={tile.tone}>Live</StatusBadge>
+								</div>
+								<p className="mt-1 text-xs text-gray-500">{tile.description}</p>
+							</div>
+							))}
+					</div>
+				</CoalCard>
+			</section>
+
+			<section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+				<CoalCard
+					title="Active incidents"
+					subtitle="Track exposures requiring attention"
+					action={
+						<CoalButton
+							variant="secondary"
+							size="sm"
+							onClick={() => router.push("/incidents")}
+						>
+							View incidents
+						</CoalButton>
+					}
+				>
+					<CoalTable
+						data={incidents}
+						isLoading={loading}
+						columns={[
+							{
+								key: "cveId",
+								header: "CVE",
+								render: (incident) => (
+									<div className="space-y-1">
+										<p className="text-sm font-semibold text-gray-900">
+											{incident.cveId}
+										</p>
+										<p className="text-xs text-gray-500">Device {incident.deviceId}</p>
+									</div>
+								),
+							},
+							{
+								key: "status",
+								header: "Status",
+								render: (incident) => (
+									<StatusBadge tone={incidentStatusTone[incident.status] ?? "neutral"}>
+										{incident.status}
+									</StatusBadge>
+								),
+							},
+							{
+								key: "assignedTo",
+								header: "Owner",
+								render: (incident) => (
+									<span className="text-xs text-gray-700">
+										{incident.assignedTo ?? "Unassigned"}
+									</span>
+								),
+							},
+							{
+								key: "updatedAt",
+								header: "Updated",
+								render: (incident) => (
+									<span className="text-xs text-gray-500">
+										{formatDateLabel(incident.updatedAt)}
+									</span>
+								),
+							},
+						]}
+						emptyState="No incidents open."
+					/>
+				</CoalCard>
+				<CoalCard
 					title="Vulnerability queue"
 					subtitle="Prioritized exposures across your managed devices"
 					action={
@@ -100,10 +293,10 @@ export default function DashboardPage() {
 									header: "Threat",
 									render: (item) => (
 										<div className="space-y-1">
-												<p className="text-sm font-semibold text-gray-900">
+											<p className="text-sm font-semibold text-gray-900">
 												{item.title}
 											</p>
-												<p className="text-xs text-gray-500">
+											<p className="text-xs text-gray-500">
 												{item.device}
 											</p>
 										</div>
@@ -117,13 +310,13 @@ export default function DashboardPage() {
 											tone={
 												item.severity === "CRITICAL"
 													? "critical"
-													: item.severity === "HIGH"
-													? "warning"
-													: item.severity === "MEDIUM"
-													? "info"
-													: item.severity === "LOW"
-													? "safe"
-													: "neutral"
+												: item.severity === "HIGH"
+												? "warning"
+												: item.severity === "MEDIUM"
+												? "info"
+												: item.severity === "LOW"
+												? "safe"
+												: "neutral"
 											}
 										>
 											{item.severity}
@@ -134,7 +327,7 @@ export default function DashboardPage() {
 									key: "detectedAt",
 									header: "Detected",
 									render: (item) => (
-											<span className="text-xs text-gray-500">
+										<span className="text-xs text-gray-500">
 											{formatDateLabel(item.detectedAt)}
 										</span>
 									),
@@ -143,7 +336,7 @@ export default function DashboardPage() {
 									key: "status",
 									header: "Status",
 									render: (item) => (
-											<span className="text-xs font-semibold text-gray-800">
+										<span className="text-xs font-semibold text-gray-800">
 											{item.status.replace("_", " ")}
 										</span>
 									),
@@ -153,14 +346,6 @@ export default function DashboardPage() {
 						/>
 					)}
 				</CoalCard>
-				<div className="space-y-6">
-					<CoalCard title="Radar sweep" subtitle="Live signal coverage">
-						<RadarWidget />
-					</CoalCard>
-					<CoalCard title="Heatmap" subtitle="Device posture across segments">
-						<HeatmapGrid />
-					</CoalCard>
-				</div>
 			</section>
 		</div>
 	);

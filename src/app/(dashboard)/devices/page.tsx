@@ -7,13 +7,17 @@ import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
 import { useDevices } from "@/hooks/useDevices";
-import type { CreateDevicePayload } from "@/lib/types";
+import type { CreateDevicePayload, DeviceState } from "@/lib/types";
 import { formatDateLabel } from "@/lib/utils";
 
 const initialForm: CreateDevicePayload = {
   vendor: "",
   product: "",
   version: "",
+  name: "",
+  ip: "",
+  serial: "",
+  state: "ACTIVE",
 };
 
 export default function DevicesPage() {
@@ -43,7 +47,7 @@ export default function DevicesPage() {
       <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <CoalCard
           title="Managed devices"
-          subtitle="Inventory synchronized from the VulnTrack API"
+          subtitle="Inventory synchronised from the VulnTrack API"
           action={
             <div className="flex items-center gap-2">
               <CoalButton variant="ghost" size="sm" onClick={() => refresh()}>
@@ -71,15 +75,28 @@ export default function DevicesPage() {
             isLoading={loading}
             columns={[
               {
-                key: "vendor",
+                key: "name",
                 header: "Device",
                 render: (device) => (
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-gray-900">
-                      {device.vendor} {device.product}
+                      {device.name ?? `${device.vendor} ${device.product}`}
                     </p>
-                    <p className="text-xs text-gray-500">Version {device.version}</p>
+                    <p className="text-xs text-gray-500">
+                      {device.vendor} {device.product} · v{device.version}
+                    </p>
                   </div>
+                ),
+              },
+              {
+                key: "state",
+                header: "State",
+                render: (device) => (
+                  <StatusBadge
+                    tone={device.state === "ACTIVE" ? "safe" : device.state === "INACTIVE" ? "neutral" : "warning"}
+                  >
+                    {device.state ?? "ACTIVE"}
+                  </StatusBadge>
                 ),
               },
               {
@@ -103,11 +120,15 @@ export default function DevicesPage() {
                 ),
               },
               {
-                key: "updatedAt",
-                header: "Last sync",
+                key: "lastScanAt",
+                header: "Last scan",
                 render: (device) => (
                   <span className="text-xs text-gray-500">
-                    {formatDateLabel(device.updatedAt)}
+                    {device.lastScanAt
+                      ? formatDateLabel(device.lastScanAt)
+                      : device.updatedAt
+                      ? formatDateLabel(device.updatedAt)
+                      : "—"}
                   </span>
                 ),
               },
@@ -185,6 +206,63 @@ export default function DevicesPage() {
               placeholder="9.3(5)"
               className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700" htmlFor="name">
+              Friendly name
+            </label>
+            <input
+              id="name"
+              name="name"
+              value={form.name ?? ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              placeholder="Core switch"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700" htmlFor="ip">
+              IP address
+            </label>
+            <input
+              id="ip"
+              name="ip"
+              value={form.ip ?? ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, ip: event.target.value }))}
+              placeholder="10.10.21.14"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700" htmlFor="serial">
+              Serial number
+            </label>
+            <input
+              id="serial"
+              name="serial"
+              value={form.serial ?? ""}
+              onChange={(event) => setForm((prev) => ({ ...prev, serial: event.target.value }))}
+              placeholder="SN123456789"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-gray-700" htmlFor="state">
+              State
+            </label>
+            <select
+              id="state"
+              name="state"
+              value={form.state ?? "ACTIVE"}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, state: event.target.value as DeviceState }))
+              }
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            >
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+              <option value="RETIRED">Retired</option>
+            </select>
           </div>
         </form>
         {formError ? (

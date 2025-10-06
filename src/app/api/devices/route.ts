@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { ApiError, createDevice, getDevices } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import type { CreateDevicePayload } from "@/lib/types";
 
 const unauthorized = NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
@@ -43,10 +44,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const device = await createDevice(session.tenantId, session.token, body as {
-      vendor: string;
-      product: string;
-      version: string;
+    const payload = body as CreateDevicePayload;
+    const device = await createDevice(session.tenantId, session.token, {
+      vendor: payload.vendor,
+      product: payload.product,
+      version: payload.version,
+      name: payload.name?.trim() || undefined,
+      ip: payload.ip?.trim() || undefined,
+      serial: payload.serial?.trim() || undefined,
+      state: payload.state,
     });
     return NextResponse.json({ device }, { status: 201 });
   } catch (error) {

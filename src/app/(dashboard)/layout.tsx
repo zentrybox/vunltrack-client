@@ -11,28 +11,24 @@ const navigation = [
     href: "/dashboard",
   },
   {
+    label: "Scans",
+    href: "/scans",
+  },
+  {
+    label: "Incidents",
+    href: "/incidents",
+  },
+  {
     label: "Device Inventory",
     href: "/devices",
   },
   {
+    label: "Scheduling",
+    href: "/scheduling",
+  },
+  {
     label: "User Directory",
     href: "/users",
-  },
-  {
-    label: "Vulnerability Radar",
-    href: "/radar",
-  },
-  {
-    label: "Scan Automation",
-    href: "/automation",
-  },
-  {
-    label: "Reports",
-    href: "/reports",
-  },
-  {
-    label: "Subscription",
-    href: "/subscription",
   },
   {
     label: "Settings",

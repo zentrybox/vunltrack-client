@@ -1,6 +1,14 @@
 @import "tailwindcss";
 
 @layer base {
+  :root {
+    color-scheme: light;
+    --surface-base: #f5f7fb;
+    --surface-accent: #eef2ff;
+    --surface-contrast: #ffffff;
+    --border-subtle: rgba(30, 64, 175, 0.08);
+  }
+
   html {
     font-family: var(--font-plex-sans, "Inter", system-ui, sans-serif);
   }
@@ -8,7 +16,10 @@
   body {
     min-height: 100vh;
     margin: 0;
-    background-color: #f9fafb;
+    background:
+      radial-gradient(circle at 0% 0%, var(--surface-accent), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(191, 219, 254, 0.55), transparent 40%),
+      linear-gradient(180deg, var(--surface-base), #ffffff 65%);
     color: #111827;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
