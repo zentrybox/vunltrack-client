@@ -53,7 +53,7 @@ export function useIncidents() {
       setError(null);
       try {
         const response = await fetch(`/api/incidents/${incidentId}`, {
-          method: "PATCH",
+          method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
@@ -63,13 +63,18 @@ export function useIncidents() {
           throw new Error(details?.message ?? "Failed to update incident");
         }
 
-        const data = (await response.json()) as IncidentUpdateResponse;
-        setIncidents((prev) =>
-          prev.map((incident) =>
-            incident.id === incidentId ? data.incident : incident,
-          ),
-        );
-        return data.incident;
+        const data = await response.json();
+
+        // Support both previous shape { incident } and { data }
+        const updated: IncidentRecord | undefined =
+          (data && (data.incident ?? data.data ?? data)) as IncidentRecord | undefined;
+
+        if (!updated) {
+          throw new Error("No incident returned");
+        }
+
+        setIncidents((prev) => prev.map((i) => (i.id === incidentId ? updated : i)));
+        return updated;
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to update incident");
         throw err;

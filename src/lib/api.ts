@@ -109,20 +109,23 @@ async function request<T>(
 }
 
 const INCIDENT_STATUS_VALUES: IncidentStatus[] = [
-  "OPEN",
-  "INVESTIGATING",
-  "CONTAINED",
-  "RESOLVED",
-  "DISMISSED",
+  "open",
+  "in_progress",
+  "escalated",
+  "resolved",
+  "closed",
+  "false_positive",
 ];
 
 function normalizeIncidentStatus(value: unknown): IncidentStatus {
   if (typeof value !== "string" || value.length === 0) {
-    return "OPEN";
+    return "open";
   }
 
-  const upper = value.toUpperCase() as IncidentStatus;
-  return INCIDENT_STATUS_VALUES.includes(upper) ? upper : "OPEN";
+  const normalized = (value as string).toLowerCase();
+  return (INCIDENT_STATUS_VALUES.includes(normalized as IncidentStatus)
+    ? (normalized as IncidentStatus)
+    : "open");
 }
 
 function normalizeIncidentRecord(incident: IncidentRecord): IncidentRecord {
@@ -136,7 +139,7 @@ function normalizeIncidentHistoryEntry(
   entry: IncidentHistoryEntry,
 ): IncidentHistoryEntry {
   const format = (value: IncidentHistoryEntry["fromStatus"]) =>
-    typeof value === "string" ? value.toUpperCase() : value;
+    typeof value === "string" ? value.toLowerCase() : value;
 
   return {
     ...entry,
@@ -446,6 +449,103 @@ export async function updateIncident(
   });
 
   return normalizeIncidentRecord(incident);
+}
+
+export async function getIncident(
+  incidentId: string,
+  token: string,
+): Promise<IncidentRecord | null> {
+  const result = await request<{ data?: IncidentRecord } | IncidentRecord>(
+    `/api/incidents/${incidentId}`,
+    { method: "GET", token },
+  );
+  if (result && typeof result === "object" && "data" in result) {
+    const inner = (result as { data?: IncidentRecord }).data;
+    return inner ? normalizeIncidentRecord(inner) : null;
+  }
+
+  return normalizeIncidentRecord(result as IncidentRecord);
+}
+
+export async function putIncident(
+  incidentId: string,
+  token: string,
+  payload: Partial<{
+    status?: string;
+    changedBy?: string;
+    comment?: string;
+    assignTo?: string | null;
+    assignedBy?: string;
+  }>,
+): Promise<IncidentRecord> {
+  const incident = await request<{ data?: IncidentRecord } | IncidentRecord>(
+    `/api/incidents/${incidentId}`,
+    {
+      method: "PUT",
+      token,
+      body: JSON.stringify(payload),
+    },
+  );
+
+  let raw: IncidentRecord | undefined;
+  if (incident && typeof incident === "object" && "data" in incident) {
+    raw = (incident as { data?: IncidentRecord }).data;
+  } else {
+    raw = incident as IncidentRecord;
+  }
+
+  if (!raw) throw new ApiError("Incident not returned", 500);
+  return normalizeIncidentRecord(raw as IncidentRecord);
+}
+
+export async function changeIncidentStatus(
+  incidentId: string,
+  token: string,
+  payload: { status: string; changedBy: string; comment?: string },
+): Promise<IncidentRecord> {
+  const res = await request<{ data?: IncidentRecord } | IncidentRecord>(
+    `/api/incidents/${incidentId}/status`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify(payload),
+    },
+  );
+
+  let raw: IncidentRecord | undefined;
+  if (res && typeof res === "object" && "data" in res) {
+    raw = (res as { data?: IncidentRecord }).data;
+  } else {
+    raw = res as IncidentRecord;
+  }
+
+  if (!raw) throw new ApiError("Incident not returned", 500);
+  return normalizeIncidentRecord(raw as IncidentRecord);
+}
+
+export async function assignIncident(
+  incidentId: string,
+  token: string,
+  payload: { assignTo: string | null; assignedBy: string },
+): Promise<IncidentRecord> {
+  const res = await request<{ data?: IncidentRecord } | IncidentRecord>(
+    `/api/incidents/${incidentId}/assign`,
+    {
+      method: "POST",
+      token,
+      body: JSON.stringify(payload),
+    },
+  );
+
+  let raw: IncidentRecord | undefined;
+  if (res && typeof res === "object" && "data" in res) {
+    raw = (res as { data?: IncidentRecord }).data;
+  } else {
+    raw = res as IncidentRecord;
+  }
+
+  if (!raw) throw new ApiError("Incident not returned", 500);
+  return normalizeIncidentRecord(raw as IncidentRecord);
 }
 
 export async function getIncidentHistory(

@@ -91,11 +91,12 @@ export default function DashboardPage() {
 	};
 
 	const incidentStatusTone: Record<string, ComponentProps<typeof StatusBadge>["tone"]> = {
-		OPEN: "critical",
-		INVESTIGATING: "warning",
-		CONTAINED: "info",
-		RESOLVED: "safe",
-		DISMISSED: "neutral",
+		open: "critical",
+		in_progress: "warning",
+		escalated: "warning",
+		resolved: "safe",
+		closed: "neutral",
+		false_positive: "neutral",
 	};
 
 	return (

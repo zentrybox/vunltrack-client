@@ -61,11 +61,10 @@ export function useDashboard() {
       )
       .slice(0, 5);
   }, [scans]);
-
   const activeIncidents = useMemo(
     () =>
       incidents
-        .filter((incident) => incident.status !== "RESOLVED")
+        .filter((incident) => incident.status !== 'resolved')
         .sort(
           (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),

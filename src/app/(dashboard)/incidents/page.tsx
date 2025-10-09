@@ -11,24 +11,25 @@ import type { IncidentStatus, UpdateIncidentPayload } from "@/lib/types";
 import { cn, formatDateLabel } from "@/lib/utils";
 
 const statusTone: Record<IncidentStatus, ComponentProps<typeof StatusBadge>["tone"]> = {
-  OPEN: "critical",
-  INVESTIGATING: "warning",
-  CONTAINED: "info",
-  RESOLVED: "safe",
-  DISMISSED: "neutral",
+  open: "critical",
+  in_progress: "warning",
+  escalated: "warning",
+  resolved: "safe",
+  closed: "neutral",
+  false_positive: "neutral",
 };
 
 const statusOrder: IncidentStatus[] = [
-  "OPEN",
-  "INVESTIGATING",
-  "CONTAINED",
-  "RESOLVED",
-  "DISMISSED",
+  "open",
+  "in_progress",
+  "escalated",
+  "resolved",
+  "closed",
+  "false_positive",
 ];
 
 const statusLabel = (status: string) =>
   status
-    .toLowerCase()
     .replace(/_/g, " ")
     .replace(/(^|\s)(\w)/g, (_, space, letter: string) => `${space}${letter.toUpperCase()}`);
 
@@ -40,7 +41,7 @@ export default function IncidentsPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [comment, setComment] = useState("");
-  const [status, setStatus] = useState<IncidentStatus>("OPEN");
+  const [status, setStatus] = useState<IncidentStatus>("open");
   const [assignee, setAssignee] = useState<string | null>(null);
   const [formMessage, setFormMessage] = useState<string | null>(null);
 
@@ -59,8 +60,8 @@ export default function IncidentsPage() {
 
   useEffect(() => {
     if (selectedIncident) {
-      const normalizedStatus = (selectedIncident.status as string).toUpperCase() as IncidentStatus;
-      setStatus(normalizedStatus);
+  const normalizedStatus = (selectedIncident.status as string).toLowerCase() as IncidentStatus;
+  setStatus(normalizedStatus);
       setAssignee(selectedIncident.assignedTo ?? null);
       setComment("");
       setHistoryLoading(true);
@@ -102,7 +103,7 @@ export default function IncidentsPage() {
       const updated = await updateIncident(selectedIncident.id, payload);
       setFormMessage(`Incident updated (${updated.status}).`);
       setComment("");
-  setStatus((updated.status as string).toUpperCase() as IncidentStatus);
+  setStatus((updated.status as string).toLowerCase() as IncidentStatus);
       setAssignee(updated.assignedTo ?? null);
       setHistoryLoading(true);
       setHistoryError(null);
@@ -149,7 +150,7 @@ export default function IncidentsPage() {
               render: (incident) => (
                 <StatusBadge
                   tone={
-                    statusTone[(incident.status as string).toUpperCase() as IncidentStatus] ??
+                    statusTone[(incident.status as string).toLowerCase() as IncidentStatus] ??
                     "neutral"
                   }
                 >

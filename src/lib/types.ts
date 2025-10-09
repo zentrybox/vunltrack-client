@@ -195,12 +195,14 @@ export interface StartScanResponse {
   scanId: string;
 }
 
+// Backend uses lowercase statuses with underscores.
 export type IncidentStatus =
-  | "OPEN"
-  | "INVESTIGATING"
-  | "CONTAINED"
-  | "RESOLVED"
-  | "DISMISSED";
+  | 'open'
+  | 'in_progress'
+  | 'escalated'
+  | 'resolved'
+  | 'closed'
+  | 'false_positive';
 
 export interface IncidentRecord {
   id: string;
