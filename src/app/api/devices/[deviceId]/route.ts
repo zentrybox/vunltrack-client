@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, deleteDevice } from "@/lib/api";
+import { ApiError, deleteDevice, updateDevice } from "@/lib/api";
 import { getSession } from "@/lib/auth";
 
 export async function DELETE(
@@ -19,5 +19,72 @@ export async function DELETE(
     const status = error instanceof ApiError ? error.status : 500;
     const message = error instanceof Error ? error.message : "Failed to remove device";
     return NextResponse.json({ message }, { status });
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  context: { params: Promise<{ deviceId: string }> },
+) {
+  const { deviceId } = await context.params;
+  const session = await getSession();
+  if (!session.tenantId || !session.token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ message: "Missing payload" }, { status: 400 });
+  }
+
+  try {
+    const device = await updateDevice(session.tenantId, deviceId, session.token, body as any);
+    return NextResponse.json({ device });
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 500;
+    // Surface backend error details for easier debugging in dev
+    const message = error instanceof Error ? error.message : "Failed to update device";
+    const details = error instanceof ApiError ? error.details : undefined;
+    console.error("Device update failed", { deviceId, status, message, details });
+    return NextResponse.json({ message, details }, { status });
+  }
+}
+
+export async function PUT(
+  request: Request,
+  context: { params: Promise<{ deviceId: string }> },
+) {
+  const { deviceId } = await context.params;
+  const session = await getSession();
+  if (!session.tenantId || !session.token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
+  }
+
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ message: "Missing payload" }, { status: 400 });
+  }
+
+  try {
+    const device = await updateDevice(session.tenantId, deviceId, session.token, body as any);
+    return NextResponse.json({ device });
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof Error ? error.message : "Failed to update device";
+    const details = error instanceof ApiError ? error.details : undefined;
+    console.error("Device update failed (PUT)", { deviceId, status, message, details });
+    return NextResponse.json({ message, details }, { status });
   }
 }

@@ -21,10 +21,12 @@ const initialForm: CreateDevicePayload = {
 };
 
 export default function DevicesPage() {
-  const { devices, loading, mutating, error, addDevice, removeDevice, refresh } =
+  const { devices, loading, mutating, error, addDevice, removeDevice, refresh, updateDevice } =
     useDevices();
   const [form, setForm] = useState<CreateDevicePayload>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<Partial<CreateDevicePayload> | null>(null);
 
   const totalCritical = useMemo(
     () => devices.reduce((sum, device) => sum + (device.criticalFindings ?? 0), 0),
@@ -137,15 +139,35 @@ export default function DevicesPage() {
                 header: "Actions",
                 align: "right",
                 render: (device) => (
-                  <CoalButton
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-600 hover:text-red-700"
-                    onClick={() => removeDevice(device.id)}
-                    isLoading={mutating}
-                  >
-                    Remove
-                  </CoalButton>
+                  <div className="flex items-center justify-end gap-2">
+                    <CoalButton
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => {
+                        setEditingId(device.id);
+                        setEditForm({
+                          vendor: device.vendor,
+                          product: device.product,
+                          version: device.version,
+                          ip: device.ip ?? undefined,
+                          name: device.name ?? undefined,
+                          serial: device.serial ?? undefined,
+                          state: device.state ?? undefined,
+                        });
+                      }}
+                    >
+                      Edit
+                    </CoalButton>
+                    <CoalButton
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700"
+                      onClick={() => removeDevice(device.id)}
+                      isLoading={mutating}
+                    >
+                      Remove
+                    </CoalButton>
+                  </div>
                 ),
               },
             ]}
@@ -165,6 +187,78 @@ export default function DevicesPage() {
           </div>
         </CoalCard>
       </section>
+
+      {editingId && editForm ? (
+        <CoalCard title="Edit device" subtitle="Update device attributes">
+          <form
+            className="grid gap-4 md:grid-cols-3"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!editingId || !editForm) return;
+              try {
+                await updateDevice(editingId, editForm as Partial<CreateDevicePayload>);
+                setEditingId(null);
+                setEditForm(null);
+              } catch (err) {
+                // error handled by hook
+              }
+            }}
+          >
+            <input
+              value={editForm.vendor ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), vendor: e.target.value })}
+              placeholder="Vendor"
+              className="rounded-md border px-3 py-2"
+            />
+            <input
+              value={editForm.product ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), product: e.target.value })}
+              placeholder="Product"
+              className="rounded-md border px-3 py-2"
+            />
+            <input
+              value={editForm.version ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), version: e.target.value })}
+              placeholder="Version"
+              className="rounded-md border px-3 py-2"
+            />
+            <input
+              value={editForm.ip ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), ip: e.target.value })}
+              placeholder="IP"
+              className="rounded-md border px-3 py-2"
+            />
+            <input
+              value={editForm.name ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), name: e.target.value })}
+              placeholder="Friendly name"
+              className="rounded-md border px-3 py-2"
+            />
+            <input
+              value={editForm.serial ?? ""}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), serial: e.target.value })}
+              placeholder="Serial"
+              className="rounded-md border px-3 py-2"
+            />
+            <div className="md:col-span-3 flex gap-2">
+              <CoalButton type="submit" variant="primary" size="sm" isLoading={mutating}>
+                Save
+              </CoalButton>
+              <CoalButton
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditingId(null);
+                  setEditForm(null);
+                }}
+              >
+                Cancel
+              </CoalButton>
+            </div>
+          </form>
+        </CoalCard>
+      ) : null}
 
       <CoalCard title="Register device" subtitle="Manual onboarding for out-of-band assets">
         <form id="device-form" className="grid gap-4 md:grid-cols-3" onSubmit={handleSubmit}>

@@ -69,6 +69,33 @@ export function useDevices() {
     [loadDevices],
   );
 
+  const updateDevice = useCallback(
+    async (deviceId: string, payload: Partial<CreateDevicePayload>) => {
+      setMutating(true);
+      setError(null);
+      try {
+        const response = await fetch(`/api/devices/${deviceId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const details = await response.json().catch(() => null);
+          throw new Error(details?.message ?? "Failed to update device");
+        }
+
+        await loadDevices();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to update device");
+        throw err;
+      } finally {
+        setMutating(false);
+      }
+    },
+    [loadDevices],
+  );
+
   const removeDevice = useCallback(
     async (deviceId: string) => {
       setMutating(true);
@@ -99,5 +126,6 @@ export function useDevices() {
     refresh: loadDevices,
     addDevice,
     removeDevice,
+    updateDevice,
   };
 }

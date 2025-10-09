@@ -199,6 +199,38 @@ export async function deleteDevice(
   });
 }
 
+export async function updateDevice(
+  tenantId: string,
+  deviceId: string,
+  token: string,
+  payload: Partial<{
+    vendor: string;
+    product: string;
+    version: string;
+    ip?: string | null;
+    name?: string | null;
+    serial?: string | null;
+    state?: string;
+  }>,
+): Promise<DeviceRecord> {
+  // Normalize known fields to match backend expectations
+  const bodyPayload = { ...payload } as Record<string, unknown>;
+  if (typeof bodyPayload.state === "string") {
+    bodyPayload.state = (bodyPayload.state as string).toUpperCase();
+  }
+
+  const device = await request<DeviceRecord>(
+    `/api/tenants/${tenantId}/devices/${deviceId}`,
+    {
+      method: "PUT",
+      token,
+      body: JSON.stringify(bodyPayload),
+    },
+  );
+
+  return device;
+}
+
 export async function listCollaborators(
   tenantId: string,
   token: string,
