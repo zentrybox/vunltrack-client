@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiError, deleteDevice, updateDevice } from "@/lib/api";
+import { ApiError, deleteDevice, getDeviceDetail, updateDevice } from "@/lib/api";
 import { getSession } from "@/lib/auth";
 import type { DeviceRecord } from "@/lib/types";
 
@@ -13,6 +13,26 @@ type UpdateDevicePayload = Partial<{
   serial?: string | null;
   state?: string;
 }>;
+
+export async function GET(
+  _request: Request,
+  context: { params: Promise<{ deviceId: string }> },
+) {
+  const { deviceId } = await context.params;
+  const session = await getSession();
+  if (!session.tenantId || !session.token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const device = await getDeviceDetail(session.tenantId, deviceId, session.token);
+    return NextResponse.json(device);
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 500;
+    const message = error instanceof Error ? error.message : "Failed to get device";
+    return NextResponse.json({ message }, { status });
+  }
+}
 
 export async function DELETE(
   _request: Request,

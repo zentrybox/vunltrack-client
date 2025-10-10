@@ -172,14 +172,18 @@ export default function ScansPage() {
                   {
                     key: "deviceId",
                     header: "Device",
-                    render: (result) => (
-                      <div className="space-y-1">
-                        <p className="text-sm font-semibold text-gray-900">{result.deviceId}</p>
-                        <p className="text-xs text-gray-500">
-                          Started {formatDateLabel(result.startedAt)}
-                        </p>
-                      </div>
-                    ),
+                    render: (result) => {
+                      const device = devices.find(d => d.id === result.deviceId);
+                      const deviceName = device?.name || device?.product || result.deviceId;
+                      return (
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-gray-900">{deviceName}</p>
+                          <p className="text-xs text-gray-500">
+                            Started {formatDateLabel(result.startedAt)}
+                          </p>
+                        </div>
+                      );
+                    },
                   },
                   {
                     key: "status",

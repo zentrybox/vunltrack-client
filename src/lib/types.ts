@@ -55,6 +55,22 @@ export interface DeviceRecord {
   lowFindings?: number;
 }
 
+export interface DeviceDetail {
+  id: string;
+  tenantId: string;
+  vendor: string;
+  product: string;
+  version: string;
+  createdAt: string;
+  ip?: string | null;
+  name?: string | null;
+  serial: string;
+  state: 'active' | 'inactive' | 'retired';
+  lastScanAt?: string | null;
+  lastScanStatus?: 'ok' | 'issues' | 'failed' | null;
+  cpe?: string | null;
+}
+
 export interface CreateDevicePayload {
   vendor: string;
   product: string;

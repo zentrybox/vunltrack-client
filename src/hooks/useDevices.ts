@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type {
   CreateDevicePayload,
+  DeviceDetail,
   DeviceRecord,
 } from "@/lib/types";
 
@@ -118,6 +119,24 @@ export function useDevices() {
     [loadDevices],
   );
 
+  const getDeviceDetail = useCallback(async (deviceId: string) => {
+    try {
+      const response = await fetch(`/api/devices/${deviceId}`, {
+        method: "GET",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        const details = await response.json().catch(() => null);
+        throw new Error(details?.message ?? "Failed to get device");
+      }
+
+      return (await response.json()) as DeviceDetail;
+    } catch (err) {
+      throw err instanceof Error ? err : new Error("Failed to get device");
+    }
+  }, []);
+
   return {
     devices,
     loading,
@@ -127,5 +146,6 @@ export function useDevices() {
     addDevice,
     removeDevice,
     updateDevice,
+    getDeviceDetail,
   };
 }

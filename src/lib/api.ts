@@ -4,6 +4,7 @@ import {
   CreateCollaboratorPayload,
   CreateDevicePayload,
   DashboardMetrics,
+  DeviceDetail,
   IncidentHistoryEntry,
   IncidentRecord,
   IncidentStatus,
@@ -233,6 +234,17 @@ export async function updateDevice(
   );
 
   return device;
+}
+
+export async function getDeviceDetail(
+  tenantId: string,
+  deviceId: string,
+  token: string,
+): Promise<DeviceDetail> {
+  return request<DeviceDetail>(`/api/tenants/${tenantId}/devices/${deviceId}`, {
+    method: "GET",
+    token,
+  });
 }
 
 export async function listCollaborators(
