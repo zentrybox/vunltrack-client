@@ -160,6 +160,7 @@ export interface ScanSummary {
   startedAt: string;
   finishedAt?: string | null;
   status: ScanStatus;
+  type: 'soft' | 'deep';
   totalDevices: number;
   completedDevices: number;
   successful: number;
@@ -185,10 +186,20 @@ export interface ScanDetailResponse {
   results: ScanResultRecord[];
 }
 
+export interface ScanStartDevice {
+  jobId?: string;
+  deviceId: string;
+  vendor?: string;
+  product?: string;
+  version?: string;
+}
+
 export interface StartScanPayload {
+  id?: string;
   tenantId: string;
   createdBy: string;
-  devices: Array<{ deviceId: string }>;
+  type?: 'soft' | 'deep';
+  devices: ScanStartDevice[];
 }
 
 export interface StartScanResponse {

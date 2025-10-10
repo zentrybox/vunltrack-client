@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { ApiError, startScan } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import type { StartScanPayload } from "@/lib/types";
 
 export async function POST(request: Request) {
   const session = await getSession();
@@ -16,38 +17,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
   }
 
-  const devicesInput =
-    body && typeof body === "object" && "devices" in body
-      ? (body as { devices?: unknown }).devices
-      : undefined;
-
-  if (!Array.isArray(devicesInput) || devicesInput.length === 0) {
-    return NextResponse.json({ message: "devices array is required" }, { status: 400 });
+  // Validate the payload structure
+  if (!body || typeof body !== "object") {
+    return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
   }
 
-  const devices = devicesInput
-    .map((item) => {
-      if (typeof item === "string") {
-        return { deviceId: item };
+  const payload = body as Partial<StartScanPayload>;
+
+  if (!payload.devices || !Array.isArray(payload.devices) || payload.devices.length === 0) {
+    return NextResponse.json({ message: "devices array is required and must not be empty" }, { status: 400 });
+  }
+
+  // Validate each device entry
+  const devices = payload.devices
+    .map((item, _index) => {
+      if (!item || typeof item !== "object" || !("deviceId" in item)) {
+        return null;
       }
-      if (item && typeof item === "object" && "deviceId" in item) {
-        const deviceId = (item as { deviceId?: unknown }).deviceId;
-        return typeof deviceId === "string" && deviceId
-          ? { deviceId }
-          : null;
+      const device = item as { deviceId: string; jobId?: string; vendor?: string; product?: string; version?: string };
+      if (typeof device.deviceId !== "string" || !device.deviceId.trim()) {
+        return null;
       }
-      return null;
+      return {
+        deviceId: device.deviceId,
+        jobId: device.jobId,
+        vendor: device.vendor,
+        product: device.product,
+        version: device.version,
+      };
     })
-    .filter((entry): entry is { deviceId: string } => entry !== null);
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
 
   if (devices.length === 0) {
-    return NextResponse.json({ message: "No valid device IDs supplied" }, { status: 400 });
+    return NextResponse.json({ message: "No valid devices supplied" }, { status: 400 });
   }
 
   try {
     const response = await startScan(session.token, {
+      id: payload.id,
       tenantId: session.tenantId,
       createdBy: session.user.id,
+      type: payload.type || 'soft',
       devices,
     });
 

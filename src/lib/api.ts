@@ -13,6 +13,7 @@ import {
   ReportSummary,
   RegisterRootPayload,
   ScanDetailResponse,
+  ScanResultRecord,
   ScanSummary,
   ScheduledScanRecord,
   SchedulePayload,
@@ -415,6 +416,17 @@ export async function getScanDetail(
   token: string,
 ): Promise<ScanDetailResponse> {
   return request<ScanDetailResponse>(`/api/scans/${scanId}`, {
+    method: "GET",
+    token,
+  });
+}
+
+export async function getScanResultByDevice(
+  scanId: string,
+  deviceId: string,
+  token: string,
+): Promise<ScanResultRecord> {
+  return request<ScanResultRecord>(`/api/scans/${scanId}/results/${deviceId}`, {
     method: "GET",
     token,
   });

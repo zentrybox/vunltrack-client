@@ -11,6 +11,25 @@ import {
 import { getSession } from "@/lib/auth";
 import type { UpdateIncidentPayload } from "@/lib/types";
 
+type PutIncidentPayload = Partial<{
+  status?: string;
+  changedBy?: string;
+  comment?: string;
+  assignTo?: string | null;
+  assignedBy?: string;
+}>;
+
+type ChangeStatusPayload = {
+  status: string;
+  changedBy: string;
+  comment?: string;
+};
+
+type AssignIncidentPayload = {
+  assignTo: string | null;
+  assignedBy: string;
+};
+
 const unauthorized = NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
 export async function GET(
@@ -76,7 +95,7 @@ export async function PUT(
   try {
     // Debug: log outgoing payload to server console for faster diagnosis.
     console.debug(`[incidents:put] incidentId=${incidentId} outgoingPayload=`, payload);
-    const updated = await putIncident(incidentId, session.token, payload as any);
+    const updated = await putIncident(incidentId, session.token, payload as PutIncidentPayload);
     return NextResponse.json({ data: updated });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;
@@ -117,12 +136,12 @@ export async function POST(
 
   try {
     if (action === "status") {
-      const updated = await changeIncidentStatus(incidentId, session.token, body as any);
+      const updated = await changeIncidentStatus(incidentId, session.token, body as ChangeStatusPayload);
       return NextResponse.json({ data: updated });
     }
 
     if (action === "assign") {
-      const updated = await assignIncident(incidentId, session.token, body as any);
+      const updated = await assignIncident(incidentId, session.token, body as AssignIncidentPayload);
       return NextResponse.json({ data: updated });
     }
 

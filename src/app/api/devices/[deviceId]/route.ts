@@ -2,6 +2,17 @@ import { NextResponse } from "next/server";
 
 import { ApiError, deleteDevice, updateDevice } from "@/lib/api";
 import { getSession } from "@/lib/auth";
+import type { DeviceRecord } from "@/lib/types";
+
+type UpdateDevicePayload = Partial<{
+  vendor: string;
+  product: string;
+  version: string;
+  ip?: string | null;
+  name?: string | null;
+  serial?: string | null;
+  state?: string;
+}>;
 
 export async function DELETE(
   _request: Request,
@@ -44,7 +55,7 @@ export async function PATCH(
   }
 
   try {
-    const device = await updateDevice(session.tenantId, deviceId, session.token, body as any);
+    const device = await updateDevice(session.tenantId, deviceId, session.token, body as UpdateDevicePayload);
     return NextResponse.json({ device });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;
@@ -78,7 +89,7 @@ export async function PUT(
   }
 
   try {
-    const device = await updateDevice(session.tenantId, deviceId, session.token, body as any);
+    const device = await updateDevice(session.tenantId, deviceId, session.token, body as UpdateDevicePayload);
     return NextResponse.json({ device });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;

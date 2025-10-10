@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import type {
   ScanDetailResponse,
+  ScanResultRecord,
   ScanSummary,
   StartScanResponse,
 } from "@/lib/types";
@@ -39,7 +40,7 @@ export function useScans() {
     void loadScans();
   }, [loadScans]);
 
-  const startScan = useCallback(async (deviceIds: string[]) => {
+  const startScan = useCallback(async (deviceIds: string[], type: 'soft' | 'deep' = 'soft') => {
     if (!deviceIds || deviceIds.length === 0) {
       throw new Error("Select at least one device");
     }
@@ -50,7 +51,7 @@ export function useScans() {
       const response = await fetch("/api/scans/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ devices: deviceIds }),
+        body: JSON.stringify({ devices: deviceIds.map(deviceId => ({ deviceId })), type }),
       });
 
       if (!response.ok) {
@@ -78,6 +79,15 @@ export function useScans() {
     return (await response.json()) as ScanDetailResponse;
   }, []);
 
+  const getScanResultByDevice = useCallback(async (scanId: string, deviceId: string) => {
+    const response = await fetch(`/api/scans/${scanId}/results/${deviceId}`, { cache: "no-store" });
+    if (!response.ok) {
+      const details = await response.json().catch(() => null);
+      throw new Error(details?.message ?? "Failed to load scan result");
+    }
+    return (await response.json()) as ScanResultRecord;
+  }, []);
+
   return {
     scans,
     loading,
@@ -86,5 +96,6 @@ export function useScans() {
     refresh: loadScans,
     startScan,
     getScanDetail,
+    getScanResultByDevice,
   };
 }

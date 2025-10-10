@@ -12,10 +12,6 @@ interface IncidentListResponse {
   incidents: IncidentRecord[];
 }
 
-interface IncidentUpdateResponse {
-  incident: IncidentRecord;
-}
-
 interface IncidentHistoryResponse {
   history: IncidentHistoryEntry[];
 }

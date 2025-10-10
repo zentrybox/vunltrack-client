@@ -199,7 +199,7 @@ export default function DevicesPage() {
                 await updateDevice(editingId, editForm as Partial<CreateDevicePayload>);
                 setEditingId(null);
                 setEditForm(null);
-              } catch (err) {
+              } catch (_err) {
                 // error handled by hook
               }
             }}
