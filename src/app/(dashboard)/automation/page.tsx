@@ -5,7 +5,14 @@ import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
 
-const schedules = [
+type ScanSchedule = {
+  id: string;
+  name: string;
+  cadence: string;
+  status: "ACTIVE" | "PAUSED";
+};
+
+const schedules: ScanSchedule[] = [
   {
     id: "weekly-core",
     name: "Weekly core sweep",

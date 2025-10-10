@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, memo, useCallback } from "react";
 
 import CoalButton from "@/components/CoalButton";
 import { cn } from "@/lib/utils";
@@ -10,7 +10,7 @@ interface TopBarProps {
   onSignOut?: () => void;
 }
 
-export default function TopBar({ userName, onSignOut }: TopBarProps) {
+const TopBar = memo(function TopBar({ userName, onSignOut }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
@@ -21,7 +21,7 @@ export default function TopBar({ userName, onSignOut }: TopBarProps) {
     .map((segment) => segment[0]?.toUpperCase())
     .join("") ?? "A";
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     if (signingOut) return;
     setSigningOut(true);
     try {
@@ -34,20 +34,26 @@ export default function TopBar({ userName, onSignOut }: TopBarProps) {
     } finally {
       setSigningOut(false);
     }
-  };
+  }, [signingOut, onSignOut]);
+
+  const toggleMenu = useCallback(() => {
+    setMenuOpen((prev) => !prev);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4 shadow-sm">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.32em] text-gray-500">
-          VulnTrack Command
-        </p>
-        <h2 className="text-xl font-semibold text-gray-900">
-          Active perimeter monitoring
-        </h2>
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6 shadow-sm">
+      <div className="flex items-center space-x-4">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-gray-500">
+            VulnTrack Command
+          </p>
+          <h2 className="text-sm font-semibold text-gray-900">
+            Active perimeter monitoring
+          </h2>
+        </div>
       </div>
       <div className="flex items-center gap-3">
-        <CoalButton variant="ghost" size="sm">
+        <CoalButton variant="ghost" size="sm" className="hidden md:inline-flex">
           Export CSV
         </CoalButton>
         <CoalButton variant="secondary" size="sm" className="hidden sm:inline-flex">
@@ -59,7 +65,7 @@ export default function TopBar({ userName, onSignOut }: TopBarProps) {
         <div className="relative">
           <button
             type="button"
-            onClick={() => setMenuOpen((prev) => !prev)}
+            onClick={toggleMenu}
             className={cn(
               "flex items-center gap-3 rounded-md border border-gray-200 bg-white px-4 py-2 text-sm text-gray-700 transition hover:bg-gray-50",
               menuOpen && "bg-gray-100",
@@ -97,4 +103,6 @@ export default function TopBar({ userName, onSignOut }: TopBarProps) {
       </div>
     </header>
   );
-}
+});
+
+export default TopBar;

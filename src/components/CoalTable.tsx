@@ -1,4 +1,4 @@
-import { isValidElement, type ReactNode } from "react";
+import { isValidElement, memo, type ReactNode, useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -19,6 +19,64 @@ interface CoalTableProps<T> {
   className?: string;
 }
 
+interface TableRowProps {
+  row: unknown;
+  columns: Array<CoalTableColumn<unknown>>;
+  rowIndex: number;
+}
+
+const TableRow = memo(function TableRow({
+  row,
+  columns,
+  rowIndex,
+}: TableRowProps) {
+  return (
+    <tr className="border-t border-gray-200 transition-colors hover:bg-gray-50">
+      {columns.map((column) => {
+        const rawValue = column.render
+          ? column.render(row)
+          : (row as Record<string, unknown>)[column.key as string];
+
+        let resolved: ReactNode;
+
+        if (rawValue === null || rawValue === undefined || rawValue === "") {
+          resolved = "—";
+        } else if (typeof rawValue === "object" && !isValidElement(rawValue)) {
+          resolved = JSON.stringify(rawValue);
+        } else {
+          resolved = rawValue as ReactNode;
+        }
+
+        return (
+          <td
+            key={String(column.key)}
+            className={cn(
+              "px-5 py-4 align-top text-gray-900",
+              column.align === "right" && "text-right",
+              column.align === "center" && "text-center",
+              column.className,
+            )}
+          >
+            {resolved}
+          </td>
+        );
+      })}
+    </tr>
+  );
+});
+
+const LoadingSkeleton = memo(function LoadingSkeleton({ columns }: { columns: number }) {
+  return (
+    <tr className="border-t border-gray-200">
+      {Array.from({ length: columns }).map((_, index) => (
+        <td key={index} className="px-5 py-4">
+          <div className="h-4 animate-pulse rounded bg-gray-200" />
+        </td>
+      ))}
+    </tr>
+  );
+});
+
 export default function CoalTable<T>({
   data,
   columns,
@@ -27,6 +85,15 @@ export default function CoalTable<T>({
   isLoading,
   className,
 }: CoalTableProps<T>) {
+  const renderTableRow = useCallback((row: T, rowIndex: number) => (
+    <TableRow
+      key={rowIndex}
+      row={row}
+      columns={columns as Array<CoalTableColumn<unknown>>}
+      rowIndex={rowIndex}
+    />
+  ), [columns]);
+
   return (
     <div
       className={cn(
@@ -60,14 +127,11 @@ export default function CoalTable<T>({
         </thead>
         <tbody>
           {isLoading ? (
-            <tr>
-              <td
-                colSpan={columns.length}
-                className="px-5 py-8 text-center text-gray-500"
-              >
-                Loading data…
-              </td>
-            </tr>
+            <>
+              <LoadingSkeleton columns={columns.length} />
+              <LoadingSkeleton columns={columns.length} />
+              <LoadingSkeleton columns={columns.length} />
+            </>
           ) : data.length === 0 ? (
             <tr>
               <td
@@ -78,42 +142,7 @@ export default function CoalTable<T>({
               </td>
             </tr>
           ) : (
-            data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className="border-t border-gray-200 transition-colors hover:bg-gray-50"
-              >
-                {columns.map((column) => {
-                  const rawValue = column.render
-                    ? column.render(row)
-                    : (row as Record<string, unknown>)[column.key as string];
-
-                  let resolved: ReactNode;
-
-                  if (rawValue === null || rawValue === undefined || rawValue === "") {
-                    resolved = "—";
-                  } else if (typeof rawValue === "object" && !isValidElement(rawValue)) {
-                    resolved = JSON.stringify(rawValue);
-                  } else {
-                    resolved = rawValue as ReactNode;
-                  }
-
-                  return (
-                    <td
-                      key={String(column.key)}
-                      className={cn(
-                        "px-5 py-4 align-top text-gray-900",
-                        column.align === "right" && "text-right",
-                        column.align === "center" && "text-center",
-                        column.className,
-                      )}
-                    >
-                      {resolved}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))
+            data.map(renderTableRow)
           )}
         </tbody>
       </table>

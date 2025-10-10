@@ -46,19 +46,24 @@ export default async function DashboardLayout({
   return (
     <>
       <div className="hidden min-h-screen w-full bg-gray-100 text-gray-900 lg:flex">
-        <CoalSidebar
-          tenantName={session.user?.tenantName ?? "Tenant"}
-          userName={session.user?.name}
-          items={navigation.map((item) => ({
-            label: item.label,
-            href: item.href,
-            badge:
-              item.href === "/dashboard" ? (
-                <StatusBadge tone="info">Live</StatusBadge>
-              ) : undefined,
-          }))}
-        />
-        <div className="flex min-h-screen flex-1 flex-col">
+        {/* Fixed Sidebar */}
+        <div className="fixed left-0 top-0 z-40 h-screen w-[280px] flex-shrink-0">
+          <CoalSidebar
+            tenantName={session.user?.tenantName ?? "Tenant"}
+            userName={session.user?.name}
+            items={navigation.map((item) => ({
+              label: item.label,
+              href: item.href,
+              badge:
+                item.href === "/dashboard" ? (
+                  <StatusBadge tone="info">Live</StatusBadge>
+                ) : undefined,
+            }))}
+          />
+        </div>
+
+        {/* Main Content Area */}
+        <div className="ml-[280px] flex min-h-screen flex-1 flex-col">
           <TopBar userName={session.user?.name} />
           <main className="flex-1 overflow-y-auto px-6 pb-12 pt-10">
             <div className="mx-auto w-full max-w-[1440px] space-y-8">{children}</div>
