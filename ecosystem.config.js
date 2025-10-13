@@ -13,15 +13,16 @@ module.exports = {
       exec_mode: "fork",
       autorestart: true,
       max_memory_restart: "1G",
-      error_log: "/var/log/pm2/vunltrack-frontend-error.log",
-      out_log: "/var/log/pm2/vunltrack-frontend-out.log",
-      log_log: "/var/log/pm2/vunltrack-frontend-combined.log",
+      error_log: "./logs/pm2-error.log",
+      out_log: "./logs/pm2-out.log",
+      log_log: "./logs/pm2-combined.log",
       time: true,
       watch: false,
       ignore_watch: [
         "node_modules",
         ".next",
-        ".git"
+        ".git",
+        "logs"
       ]
     }
   ]
