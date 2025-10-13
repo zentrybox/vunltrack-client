@@ -4,7 +4,7 @@ module.exports = {
       name: "frontend",
       script: "npm",
       args: "start",
-      cwd: "/root/nextjs-frontend",
+      cwd: "/home/vulntrack/frontend",
       env: {
         NODE_ENV: "production",
         PORT: 3000
