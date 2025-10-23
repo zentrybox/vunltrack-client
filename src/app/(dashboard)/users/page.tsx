@@ -91,12 +91,16 @@ export default function UsersPage() {
               render: (user) => (
                 <CoalButton
                   variant="ghost"
-                  size="sm"
+                  size="icon"
+                  aria-label="Remove user"
                   className="text-red-600 hover:text-red-700"
                   onClick={() => removeUser(user.id)}
                   isLoading={mutating}
                 >
-                  Remove
+                  {/* Basurero SVG */}
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5v5m5-5v5M3.75 6.25h12.5M5.5 6.25v8.75a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6.25m-7.5 0V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.25" />
+                  </svg>
                 </CoalButton>
               ),
             },

@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { ApiError, deleteDevice, getDeviceDetail, updateDevice } from "@/lib/api";
 import { getSession } from "@/lib/auth";
-import type { DeviceRecord } from "@/lib/types";
 
 type UpdateDevicePayload = Partial<{
   vendor: string;

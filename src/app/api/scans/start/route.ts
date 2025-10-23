@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
   // Validate each device entry
   const devices = payload.devices
-    .map((item, _index) => {
+    .map((item) => {
       if (!item || typeof item !== "object" || !("deviceId" in item)) {
         return null;
       }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo, useState } from "react";
+import { analyzeWithClaude, generateReport } from "@/lib/claudeClient";
+import type { VulnerabilityAnalysis, CVE, ScanResultRecord } from "@/lib/types";
 
 import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
@@ -29,6 +31,9 @@ export default function ScansPage() {
   const [scanDetail, setScanDetail] = useState<ScanDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [deviceAnalyses, setDeviceAnalyses] = useState<Record<string, VulnerabilityAnalysis | null>>({});
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
 
   const selectableDevices = useMemo(
     () => devices.slice().sort((a, b) => (a.name ?? a.product).localeCompare(b.name ?? b.product)),
@@ -214,9 +219,109 @@ export default function ScansPage() {
                       </span>
                     ),
                   },
+                  {
+                    key: "actions",
+                    header: "Actions",
+                    align: "right",
+                    render: (result) => (
+                      <div className="flex items-center gap-2">
+                        <CoalButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            // run analysis for this device
+                            setAnalysisError(null);
+                            setAnalysisLoading(true);
+                            try {
+                              // use the cves from the scan result row
+                              const scanRes = result as ScanResultRecord;
+                              const cves: CVE[] = (scanRes.cves || []).map((c: string) => ({ cveId: c }));
+                              const device = devices.find(d => d.id === result.deviceId);
+                              const analysis = await analyzeWithClaude(
+                                device?.vendor ?? "",
+                                device?.product ?? "",
+                                device?.version ?? "",
+                                cves,
+                              );
+                              setDeviceAnalyses((prev) => ({ ...prev, [result.deviceId]: analysis }));
+                            } catch (err) {
+                              setAnalysisError(err instanceof Error ? err.message : "Failed to analyze");
+                            } finally {
+                              setAnalysisLoading(false);
+                            }
+                          }}
+                        >
+                          Analyze
+                        </CoalButton>
+                        <CoalButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              const scanRes = result as ScanResultRecord;
+                              const cves: CVE[] = (scanRes.cves || []).map((c: string) => ({ cveId: c }));
+                              const device = devices.find(d => d.id === result.deviceId);
+                              const analysis = deviceAnalyses[result.deviceId] ?? undefined;
+                              const report = await generateReport(
+                                device?.vendor ?? "",
+                                device?.product ?? "",
+                                device?.version ?? "",
+                                cves,
+                                analysis,
+                              );
+                              // download as JSON
+                              const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `report-${report.id}.json`;
+                              document.body.appendChild(a);
+                              a.click();
+                              a.remove();
+                              URL.revokeObjectURL(url);
+                            } catch (err) {
+                              setAnalysisError(err instanceof Error ? err.message : "Failed to generate report");
+                            }
+                          }}
+                        >
+                          Export
+                        </CoalButton>
+                      </div>
+                    ),
+                  },
                 ]}
                 emptyState="No device results yet."
               />
+              {analysisError ? (
+                <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {analysisError}
+                </p>
+              ) : null}
+              {analysisLoading ? (
+                <p className="mt-3 text-sm text-gray-500">Running analysis…</p>
+              ) : null}
+              {Object.entries(deviceAnalyses).filter(([, a]) => a).length > 0 && (
+                <div className="space-y-3">
+                  {Object.entries(deviceAnalyses)
+                    .filter(([, a]) => a)
+                    .map(([deviceId, analysis]) => {
+                      const a = analysis as VulnerabilityAnalysis;
+                      return (
+                        <CoalCard key={deviceId} title={`Analysis ${deviceId}`} subtitle={a.riskLevel}>
+                          <p className="text-sm text-gray-700">{a.summary}</p>
+                          <div className="mt-3 space-y-2">
+                            <p className="text-xs font-semibold text-gray-900">Recommendations</p>
+                            <ul className="list-disc pl-5 text-sm text-gray-700">
+                              {a.recommendations?.map((r: string, i: number) => (
+                                <li key={i}>{r}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        </CoalCard>
+                      );
+                    })}
+                </div>
+              )}
             </div>
           ) : detailError ? (
             <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">

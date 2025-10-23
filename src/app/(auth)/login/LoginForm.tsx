@@ -20,7 +20,7 @@ export default function LoginForm() {
     >
       <form action={formAction} className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Email
           </label>
           <input
@@ -29,11 +29,11 @@ export default function LoginForm() {
             type="email"
             required
             placeholder="analyst@tenant.io"
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
             Password
           </label>
           <input
@@ -42,7 +42,7 @@ export default function LoginForm() {
             type="password"
             required
             placeholder="••••••••"
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
           />
         </div>
         {state.status === "error" ? (
@@ -53,7 +53,7 @@ export default function LoginForm() {
         <CoalButton type="submit" className="w-full" isLoading={isPending} disabled={isPending}>
           Enter Command Center
         </CoalButton>
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           First time tenant?{' '}
           <Link href="/register" className="text-blue-600 hover:underline">
             Create a root account

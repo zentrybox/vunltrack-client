@@ -7,7 +7,6 @@ import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
-import { SkeletonCard, SkeletonTable } from "@/components/Skeleton";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn, formatDateLabel } from "@/lib/utils";
 

@@ -1,3 +1,20 @@
+// Claude API call for summaries
+export async function callClaude(prompt: string, token?: string): Promise<string> {
+  // Aquí deberías poner la URL real de la API de Claude, el endpoint y la API key
+  // Para demo, se asume un endpoint local /api/analysis/claude
+  const resp = await fetch(`${API_BASE_URL}/api/analysis/claude`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!resp.ok) throw new Error(await resp.text());
+  const data = await resp.json();
+  // Se espera que el backend devuelva { summary }
+  return data.summary || data.analysis?.summary || data.analysis || "";
+}
 import { API_BASE_URL } from "./config";
 import {
   CollaboratorRecord,

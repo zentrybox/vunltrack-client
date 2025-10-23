@@ -9,7 +9,7 @@ import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
 import { useIncidents } from "@/hooks/useIncidents";
 import type { IncidentStatus } from "@/lib/types";
-import { cn, formatDateLabel } from "@/lib/utils";
+import { formatDateLabel } from "@/lib/utils";
 
 const statusTone: Record<IncidentStatus, ComponentProps<typeof StatusBadge>["tone"]> = {
   open: "critical",

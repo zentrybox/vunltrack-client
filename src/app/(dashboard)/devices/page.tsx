@@ -55,15 +55,6 @@ export default function DevicesPage() {
               <CoalButton variant="ghost" size="sm" onClick={() => refresh()}>
                 Refresh
               </CoalButton>
-              <CoalButton
-                variant="primary"
-                size="sm"
-                form="device-form"
-                type="submit"
-                isLoading={mutating}
-              >
-                Add device
-              </CoalButton>
             </div>
           }
         >
@@ -141,8 +132,9 @@ export default function DevicesPage() {
                 render: (device) => (
                   <div className="flex items-center justify-end gap-2">
                     <CoalButton
-                      variant="secondary"
-                      size="sm"
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Edit device"
                       onClick={() => {
                         setEditingId(device.id);
                         setEditForm({
@@ -156,16 +148,23 @@ export default function DevicesPage() {
                         });
                       }}
                     >
-                      Edit
+                      {/* Lápiz SVG */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-blue-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 5.487a2.1 2.1 0 0 0-2.97-2.97l-8.1 8.1a2.1 2.1 0 0 0-.553.98l-.6 2.4a.6.6 0 0 0 .73.73l2.4-.6a2.1 2.1 0 0 0 .98-.553l8.1-8.1ZM11.25 6.75l2 2" />
+                      </svg>
                     </CoalButton>
                     <CoalButton
                       variant="ghost"
-                      size="sm"
+                      size="icon"
+                      aria-label="Remove device"
                       className="text-red-600 hover:text-red-700"
                       onClick={() => removeDevice(device.id)}
                       isLoading={mutating}
                     >
-                      Remove
+                      {/* Basurero SVG */}
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 7.5v5m5-5v5M3.75 6.25h12.5M5.5 6.25v8.75a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6.25m-7.5 0V5a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v1.25" />
+                      </svg>
                     </CoalButton>
                   </div>
                 ),
@@ -199,7 +198,7 @@ export default function DevicesPage() {
                 await updateDevice(editingId, editForm as Partial<CreateDevicePayload>);
                 setEditingId(null);
                 setEditForm(null);
-              } catch (_err) {
+              } catch {
                 // error handled by hook
               }
             }}
@@ -359,6 +358,17 @@ export default function DevicesPage() {
             </select>
           </div>
         </form>
+        <div className="mt-4 flex items-center justify-end">
+          <CoalButton
+            variant="primary"
+            size="sm"
+            form="device-form"
+            type="submit"
+            isLoading={mutating}
+          >
+            Add device
+          </CoalButton>
+        </div>
         {formError ? (
           <p className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
             {formError}

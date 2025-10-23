@@ -284,6 +284,23 @@ export interface ReportSummary {
   generatedAt: string;
 }
 
+// CVE shape used by the frontend analysis flow (adapted from python)
+export interface CVE {
+  cveId: string;
+  severity?: string;
+  cvssScore?: number | null;
+  summary?: string;
+  references?: string[];
+}
+
+export interface VulnerabilityAnalysis {
+  riskLevel: string; // e.g. CRITICAL/HIGH/MEDIUM/LOW/UNKNOWN
+  summary: string;
+  recommendations: string[];
+  priorityActions: string[];
+  impact?: string;
+}
+
 export interface ApiErrorShape {
   message: string;
   status: number;

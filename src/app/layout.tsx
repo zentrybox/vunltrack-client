@@ -26,7 +26,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${plexSans.variable} ${plexMono.variable} bg-gray-50 text-gray-900`}>
+      <head />
+      <body className={`${plexSans.variable} ${plexMono.variable} bg-gray-50 text-gray-900 dark:bg-blue-950 dark:text-gray-100 transition-colors`}>
         {children}
       </body>
     </html>

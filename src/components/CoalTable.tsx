@@ -31,7 +31,10 @@ const TableRow = memo(function TableRow({
   rowIndex,
 }: TableRowProps) {
   return (
-    <tr className="border-t border-gray-200 transition-colors hover:bg-gray-50">
+    <tr className={cn(
+      "border-t border-gray-200 dark:border-blue-900 transition-all duration-150 hover:bg-blue-50/40 dark:hover:bg-blue-950/30",
+      rowIndex % 2 === 0 ? "bg-white dark:bg-blue-950" : "bg-gray-50 dark:bg-gray-900"
+    )}>
       {columns.map((column) => {
         const rawValue = column.render
           ? column.render(row)
@@ -51,7 +54,7 @@ const TableRow = memo(function TableRow({
           <td
             key={String(column.key)}
             className={cn(
-              "px-5 py-4 align-top text-gray-900",
+              "px-5 py-4 align-top text-gray-900 dark:text-gray-100",
               column.align === "right" && "text-right",
               column.align === "center" && "text-center",
               column.className,
@@ -67,10 +70,10 @@ const TableRow = memo(function TableRow({
 
 const LoadingSkeleton = memo(function LoadingSkeleton({ columns }: { columns: number }) {
   return (
-    <tr className="border-t border-gray-200">
+    <tr className="border-t border-gray-200 dark:border-gray-800">
       {Array.from({ length: columns }).map((_, index) => (
         <td key={index} className="px-5 py-4">
-          <div className="h-4 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 animate-pulse rounded bg-gray-200 dark:bg-gray-800" />
         </td>
       ))}
     </tr>
@@ -97,24 +100,25 @@ export default function CoalTable<T>({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg border border-gray-200 bg-white",
+        "overflow-x-auto rounded-2xl border border-gray-900/10 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950 shadow-xl",
+        "scrollbar-thin scrollbar-thumb-blue-300 scrollbar-track-gray-100 dark:scrollbar-thumb-blue-900 dark:scrollbar-track-gray-950",
         className,
       )}
     >
-      <table className="min-w-full border-collapse text-left text-sm text-gray-700">
+      <table className="min-w-full border-collapse text-left text-sm text-gray-700 dark:text-gray-200">
         {caption ? (
-          <caption className="px-5 py-3 text-left text-gray-500">
+          <caption className="px-5 py-3 text-left text-gray-500 dark:text-gray-400">
             {caption}
           </caption>
         ) : null}
-        <thead className="bg-gray-50 text-gray-500">
+        <thead className="sticky top-0 z-10 bg-gradient-to-r from-blue-100 via-blue-50 to-white dark:from-blue-950 dark:via-gray-950 dark:to-blue-900 text-blue-700 dark:text-blue-200 shadow-sm">
           <tr>
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 scope="col"
                 className={cn(
-                  "border-b border-gray-200 px-5 py-3 text-xs font-semibold uppercase tracking-wide",
+                  "border-b border-gray-200 dark:border-gray-800 px-5 py-3 text-xs font-bold uppercase tracking-wide",
                   column.align === "right" && "text-right",
                   column.align === "center" && "text-center",
                   column.className,
@@ -136,7 +140,7 @@ export default function CoalTable<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-5 py-8 text-center text-gray-500"
+                className="px-5 py-8 text-center text-gray-500 dark:text-gray-400"
               >
                 {emptyState ?? "No records found."}
               </td>
