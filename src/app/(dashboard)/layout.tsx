@@ -23,10 +23,6 @@ const navigation = [
     href: "/devices",
   },
   {
-    label: "Scheduling",
-    href: "/scheduling",
-  },
-  {
     label: "User Directory",
     href: "/users",
   },

@@ -7,7 +7,6 @@ import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
-import { useReports } from "@/hooks/useReports";
 import { useSubscription } from "@/hooks/useSubscription";
 import type { SubscriptionSimulation, SubscriptionStatus } from "@/lib/types";
 import { formatDateLabel } from "@/lib/utils";
@@ -22,11 +21,6 @@ const quickLinks = [
     href: "/incidents",
     label: "Incidents",
     description: "Coordinate remediation steps across the team.",
-  },
-  {
-    href: "/scheduling",
-    label: "Scheduling",
-    description: "Automate recurring sweeps across device groups.",
   },
   {
     href: "/users",
@@ -61,12 +55,7 @@ export default function SettingsPage() {
     mutating: subscriptionMutating,
     refresh: refreshSubscription,
   } = useSubscription();
-  const {
-    reports,
-    loading: reportsLoading,
-    error: reportsError,
-    refresh: refreshReports,
-  } = useReports();
+  
 
   const [targetPlan, setTargetPlan] = useState<SubscriptionStatus["plan"]>("STANDARD");
   const [simulation, setSimulation] = useState<SubscriptionSimulation | null>(null);
@@ -256,59 +245,7 @@ export default function SettingsPage() {
         </div>
       </CoalCard>
 
-      <CoalCard
-        title="Reports library"
-        subtitle="Executive-ready exports and compliance packages"
-        action={
-          <CoalButton variant="ghost" size="sm" onClick={refreshReports}>
-            Refresh
-          </CoalButton>
-        }
-      >
-        {reportsError ? (
-          <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-            {reportsError}
-          </p>
-        ) : null}
-        <CoalTable
-          data={reports}
-          isLoading={reportsLoading}
-          columns={[
-            {
-              key: "name",
-              header: "Report",
-              render: (report) => (
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-gray-900">{report.name}</p>
-                  <p className="text-xs text-gray-500">ID: {report.id}</p>
-                </div>
-              ),
-            },
-            {
-              key: "format",
-              header: "Format",
-            },
-            {
-              key: "generatedAt",
-              header: "Generated",
-              render: (report) => (
-                <span className="text-xs text-gray-500">{formatDateLabel(report.generatedAt)}</span>
-              ),
-            },
-            {
-              key: "actions",
-              header: "",
-              align: "right",
-              render: () => (
-                <CoalButton variant="ghost" size="sm">
-                  Download
-                </CoalButton>
-              ),
-            },
-          ]}
-          emptyState="No reports have been generated yet. Configure schedules to receive automated exports."
-        />
-      </CoalCard>
+      {/* Reports library templates hidden per request; incidents flow will use its existing template logic. */}
 
       <CoalCard title="Audit log" subtitle="Recent administrative activity">
         <CoalTable

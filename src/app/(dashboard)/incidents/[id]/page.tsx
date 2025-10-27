@@ -523,7 +523,12 @@ export default function IncidentDetailPage() {
                   <p className="text-sm text-gray-700">
                     Last updated {formatDateLabel(incident.updatedAt)}
                   </p>
-                  <StatusBadge tone="critical">High Priority</StatusBadge>
+                  {(() => {
+                    const count = typeof deviceResult.cveCount === 'number' ? deviceResult.cveCount : deviceResult.cves.length;
+                    const label = count >= 3 ? 'High Priority' : count >= 1 ? 'Medium Priority' : 'Low Priority';
+                    const tone: ComponentProps<typeof StatusBadge>['tone'] = count >= 3 ? 'critical' : count >= 1 ? 'warning' : 'safe';
+                    return <StatusBadge tone={tone}>{label}</StatusBadge>;
+                  })()}
                 </div>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {deviceResult.cves.map((cve) => (
@@ -619,6 +624,9 @@ export default function IncidentDetailPage() {
                                 }
                               : undefined;
 
+                            let template = 'default';
+                            try { const t = localStorage.getItem('reportTemplate'); if (t) template = t; } catch {}
+
                             const blob = await generatePdfReport(
                               vendor,
                               product,
@@ -626,7 +634,7 @@ export default function IncidentDetailPage() {
                               cves,
                               analysisResult,
                               scanMeta,
-                              { generatedAt, locale, timeZone },
+                              { generatedAt, locale, timeZone, template },
                             );
 
                             const url = URL.createObjectURL(blob);
@@ -656,7 +664,7 @@ export default function IncidentDetailPage() {
                           setShowLangModal(true);
                         }}
                       >
-                        Resumen por la IA
+                        AI-assisted summary
                       </CoalButton>
 
                       {showLangModal && (
@@ -672,7 +680,7 @@ export default function IncidentDetailPage() {
                             >
                               ✕
                             </button>
-                            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Seleccione el idioma</h3>
+                            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Select the language</h3>
                             <div className="flex gap-4 justify-center mb-4">
                               <button
                                 className="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
@@ -693,7 +701,7 @@ export default function IncidentDetailPage() {
                                 English
                               </button>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Se reproducirá un resumen corto y amigable en el idioma seleccionado.</p>
+                            <p className="text-sm text-gray-600 dark:text-gray-300">A short and friendly summary will be played in the selected language.</p>
                           </div>
                         </div>
                       )}
@@ -707,7 +715,7 @@ export default function IncidentDetailPage() {
                         }}
                         disabled={!speaking}
                       >
-                        Parar voz
+                        Stop AI-assisted summary
                       </CoalButton>
                     </div>
                   </div>

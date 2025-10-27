@@ -14,12 +14,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
   }
 
-  const { vendor, product, version, cves, analysis } = body as {
+  const { vendor, product, version, cves, analysis, template } = body as {
     vendor: string;
     product: string;
     version: string;
     cves: CVE[];
     analysis?: VulnerabilityAnalysis;
+    template?: string;
   };
 
   const report = {
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
     generatedAt: new Date().toISOString(),
     tenantId: session.tenantId ?? null,
     user: session.user ?? null,
+  template: template || 'default',
     device: { vendor, product, version },
     cves: cves ?? [],
     analysis: analysis ?? null,

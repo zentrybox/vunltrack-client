@@ -32,15 +32,61 @@ export function useDashboard() {
     setError(null);
     try {
       const response = await fetch("/api/dashboard", { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error("Unable to load dashboard");
-      }
+      if (!response.ok) throw new Error("Unable to load dashboard");
       const data = (await response.json()) as DashboardResponse;
-      setMetrics(data.metrics);
+
+      // Always set lists first
       setQueue(data.queue);
       setScans(data.scans ?? []);
       setIncidents(data.incidents ?? []);
       setSystemMetrics(data.systemMetrics ?? null);
+
+      // Start from server-provided metrics
+      const derived: DashboardMetrics = {
+        totalDevices: data.metrics?.totalDevices ?? 0,
+        criticalFindings: data.metrics?.criticalFindings ?? 0,
+        highFindings: data.metrics?.highFindings ?? 0,
+        mediumFindings: data.metrics?.mediumFindings ?? 0,
+        lowFindings: data.metrics?.lowFindings ?? 0,
+        lastScanAt: data.metrics?.lastScanAt ?? null,
+      };
+
+      // Enhance with latest scan detail if available
+      try {
+        const scansAll = (data.scans ?? [])
+          .slice()
+          .sort((a: ScanSummary, b: ScanSummary) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+        const latest = scansAll[0];
+        if (latest) {
+          const detailResp = await fetch(`/api/scans/${latest.id}`, { cache: "no-store" });
+          if (detailResp.ok) {
+            const detail = (await detailResp.json()) as {
+              scan: ScanSummary;
+              results: { cveCount?: number; cves?: string[] }[];
+            };
+            const getCount = (r: { cveCount?: number; cves?: string[] }) =>
+              typeof r.cveCount === "number" ? r.cveCount : r.cves?.length ?? 0;
+            const results = detail.results || [];
+            const totalCves = results.reduce((sum, r) => sum + getCount(r), 0);
+            // Critical findings: total CVEs across all devices in latest scan
+            derived.criticalFindings = totalCves;
+            // Device buckets by simple CVE count threshold
+            const highDevices = results.filter((r) => getCount(r) >= 3).length; // High Priority
+            const mediumDevices = results.filter((r) => {
+              const c = getCount(r);
+              return c >= 1 && c <= 2;
+            }).length; // Medium Priority
+            derived.highFindings = highDevices;
+            derived.mediumFindings = mediumDevices;
+            derived.totalDevices = detail.scan?.totalDevices ?? derived.totalDevices;
+            derived.lastScanAt = detail.scan?.startedAt ?? derived.lastScanAt ?? null;
+          }
+        }
+      } catch {
+        // ignore and keep server metrics
+      }
+
+      setMetrics(derived);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {

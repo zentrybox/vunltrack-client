@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Invalid JSON" }, { status: 400 });
   }
 
-  const { vendor, product, version, scan, cves, analysis, generatedAt, locale, timeZone }: {
+  const { vendor, product, version, scan, cves, analysis, generatedAt, locale, timeZone, template }: {
     vendor: string;
     product: string;
     version: string;
@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     generatedAt?: string | null;
     locale?: string | null;
     timeZone?: string | null;
+    template?: string | null;
   } = payload as {
     vendor: string;
     product: string;
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
     generatedAt?: string | null;
     locale?: string | null;
     timeZone?: string | null;
+    template?: string | null;
   };
 
   const cveList: string[] = Array.isArray(cves)
@@ -113,7 +115,16 @@ export async function POST(request: Request) {
   // Modern cover/title section
   const coverHeight = 80;
   currentPage.drawRectangle({ x: 0, y: height - coverHeight, width, height: coverHeight, color: primary });
-  const headerTitle = "VulnTrack Security Report";
+  const tpl = (template || 'default').toLowerCase();
+  const headerTitle = tpl === 'iso-27001'
+    ? 'ISO/IEC 27001 Security Report'
+    : tpl === 'iso-27002'
+    ? 'ISO/IEC 27002 Controls Mapping'
+    : tpl === 'exec-brief'
+    ? 'Executive Security Brief'
+    : tpl === 'nist-csf'
+    ? 'NIST CSF Security Report'
+    : 'VulnTrack Security Report';
   const headerTitleSize = 28;
   const titleWidth = fontBold.widthOfTextAtSize(headerTitle, headerTitleSize);
   currentPage.drawText(headerTitle, { x: margin + (contentWidth - titleWidth) / 2, y: height - coverHeight + 30, size: headerTitleSize, font: fontBold, color: rgb(1,1,1) });
@@ -183,6 +194,51 @@ export async function POST(request: Request) {
     ensureSpaceP(24);
     drawTextP("None");
     y -= 24;
+  }
+
+  // Template-specific compliance sections
+  if (tpl !== 'default') {
+    ensureSpaceP(40);
+    if (tpl === 'iso-27001') {
+      section('ISO/IEC 27001 ISMS Context');
+      drawTextP('This section outlines the ISMS context and risk treatment approach aligned to ISO/IEC 27001.', 11, textColor);
+      drawTextP('Scope: Device-level vulnerability findings and remediation priorities.', 11, textColor);
+      ensureSpaceP(20);
+      section('Annex A Controls Mapping (examples)');
+      const annx = [
+        'A.5 Information security policies – define and maintain vulnerability management policies.',
+        'A.8 Asset management – maintain an inventory of assets and associated risks.',
+        'A.12 Operations security – establish processes for vulnerability scanning and patching.',
+        'A.16 Information security incident management – respond to and learn from incidents.',
+      ];
+      annx.forEach((t) => drawTextP(`• ${t}`, 11, textColor));
+    } else if (tpl === 'iso-27002') {
+      section('ISO/IEC 27002 Controls Mapping');
+      const lines = [
+        '8.8 Management of technical vulnerabilities – identification, assessment, and remediation.',
+        '5.23 Information security for use of cloud services – ensure vulnerability processes extend to cloud workloads.',
+        '12.6 Technical vulnerability management – timely application of patches and mitigations.',
+      ];
+      lines.forEach((t) => drawTextP(`• ${t}`, 11, textColor));
+    } else if (tpl === 'exec-brief') {
+      section('Executive Summary');
+      drawTextP('Overall risk posture and key exposures identified during the latest scan.', 11, textColor);
+      drawTextP('Top 3 recommended actions to reduce risk quickly.', 11, textColor);
+      ensureSpaceP(20);
+      section('Business Impact (overview)');
+      drawTextP('Potential service disruption, data exposure risk, and compliance implications.', 11, textColor);
+    } else if (tpl === 'nist-csf') {
+      section('NIST Cybersecurity Framework (CSF) Summary');
+      const pillars = [
+        'Identify – asset inventory and risk assessment updated from findings.',
+        'Protect – patching and configuration hardening prioritized.',
+        'Detect – continuous scanning and alerting improvements.',
+        'Respond – incident response workflow and lessons learned.',
+        'Recover – validation of remediation and resilience planning.',
+      ];
+      pillars.forEach((p) => drawTextP(`• ${p}`, 11, textColor));
+    }
+    y -= 12;
   }
 
   // Recommendations (modern card)
