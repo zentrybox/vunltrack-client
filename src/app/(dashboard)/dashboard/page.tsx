@@ -10,6 +10,8 @@ import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn, formatDateLabel } from "@/lib/utils";
+import { computeAverageScanDuration, computeDetectionQuality, computeTimeSavings } from "@/lib/solution-kpis";
+import type { IncidentRecord } from "@/lib/types";
 
 const statCards = [
 	{
@@ -97,6 +99,26 @@ export default function DashboardPage() {
 		},
 	];
 
+	// Derived Solution KPIs (safe fallbacks, no-op on missing data)
+	const avgScan = computeAverageScanDuration(scans, 30);
+	const quality = computeDetectionQuality({ incidents });
+	const falsePositives = incidents.filter((i: IncidentRecord) => i.status === 'false_positive').length;
+	const savings = computeTimeSavings({ incidents, windowDays: 30, manualMinutesPerDetection: 20, automatedMinutesPerDetection: 2, countFromStatuses: ['resolved', 'closed'] });
+
+	function formatPct(n?: number) {
+		if (typeof n !== 'number' || !Number.isFinite(n)) return '—';
+		return `${Math.round(n * 100)}%`;
+	}
+
+	function formatMs(ms?: number) {
+		if (typeof ms !== 'number' || !Number.isFinite(ms) || ms <= 0) return '—';
+		const s = Math.round(ms / 1000);
+		if (s < 60) return `${s}s`;
+		const m = Math.floor(s / 60);
+		const rs = s % 60;
+		return rs > 0 ? `${m}m ${rs}s` : `${m}m`;
+	}
+
 	const scanStatusTone: Record<string, ComponentProps<typeof StatusBadge>["tone"]> = {
 		running: "info",
 		completed: "safe",
@@ -162,6 +184,54 @@ export default function DashboardPage() {
 						</div>
 					</CoalCard>
 				))}
+			</section>
+
+			{/* Solution KPIs */}
+			<section>
+				<CoalCard title="Solution KPIs" subtitle="Precisión, rendimiento y ahorro (últimos 30 días)">
+					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Precisión de detección</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.safe)}>
+								{loading ? '—' : formatPct(quality.precision)}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">Proxy por incidentes (TP: resolved/closed, FP: false_positive)</p>
+						</div>
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Tiempo de escaneo promedio</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.info)}>
+								{loading ? '—' : formatMs(avgScan.averageMs ?? systemMetrics?.averageScanDurationMs)}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">Ventana 30d {avgScan.sample ? `(${avgScan.sample} muestras)` : ''}</p>
+						</div>
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Falsos positivos</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.neutral)}>
+								{loading ? '—' : falsePositives}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">Incidentes marcados como false_positive</p>
+						</div>
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Falsos negativos</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.warning)}>N/A</p>
+							<p className="mt-1 text-xs text-gray-500">Requiere ground-truth o resultados consecutivos</p>
+						</div>
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Horas ahorradas/mes</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.safe)}>
+								{loading ? '—' : Math.round(savings.hoursSaved)}h
+							</p>
+							<p className="mt-1 text-xs text-gray-500">Supuestos: 20m manual, 2m automatizado</p>
+						</div>
+						<div className="rounded-md border border-gray-200 bg-gray-50 p-4">
+							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Detecciones gestionadas (30d)</p>
+							<p className={cn("mt-1 text-2xl font-semibold", toneTextClass.info)}>
+								{loading ? '—' : savings.detectionsHandled}
+							</p>
+							<p className="mt-1 text-xs text-gray-500">Estados: resolved, closed</p>
+						</div>
+					</div>
+				</CoalCard>
 			</section>
 
 			<section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
