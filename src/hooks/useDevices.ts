@@ -70,6 +70,40 @@ export function useDevices() {
     [loadDevices],
   );
 
+  const bulkAddDevices = useCallback(
+    async (items: CreateDevicePayload[]) => {
+      setMutating(true);
+      setError(null);
+      try {
+        const response = await fetch("/api/devices/bulk", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ devices: items }),
+        });
+
+        if (!response.ok) {
+          const details = await response.json().catch(() => null);
+          throw new Error(details?.message ?? "Failed to import devices");
+        }
+
+        const summary = await response.json();
+        await loadDevices();
+        return summary as {
+          total: number;
+          created: number;
+          failed: number;
+          results: Array<{ index: number; status: string; id?: string; error?: string }>;
+        };
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to import devices");
+        throw err;
+      } finally {
+        setMutating(false);
+      }
+    },
+    [loadDevices],
+  );
+
   const updateDevice = useCallback(
     async (deviceId: string, payload: Partial<CreateDevicePayload>) => {
       setMutating(true);
@@ -144,6 +178,7 @@ export function useDevices() {
     mutating,
     refresh: loadDevices,
     addDevice,
+    bulkAddDevices,
     removeDevice,
     updateDevice,
     getDeviceDetail,

@@ -321,7 +321,7 @@ export default function IncidentDetailPage() {
         <CoalButton variant="secondary" onClick={() => router.push('/incidents')}>
           ← Back to Incidents
         </CoalButton>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Incident {incident.id}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Incident {incident.id}</h1>
       </div>
 
       {/* Incident Overview */}
@@ -329,11 +329,11 @@ export default function IncidentDetailPage() {
         <CoalCard title="Incident Details">
           <dl className="space-y-3 text-sm">
             <div>
-              <dt className="font-semibold text-gray-900 dark:text-gray-100">ID</dt>
-              <dd className="text-gray-700 dark:text-gray-300">{incident.id}</dd>
+              <dt className="font-semibold text-gray-900">ID</dt>
+              <dd className="text-gray-700">{incident.id}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900 dark:text-gray-100">Status</dt>
+              <dt className="font-semibold text-gray-900">Status</dt>
               <dd>
                 <StatusBadge tone={statusTone[incident.status] ?? 'neutral'}>
                   {statusLabel(incident.status)}
@@ -341,16 +341,16 @@ export default function IncidentDetailPage() {
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900 dark:text-gray-100">Assigned To</dt>
-              <dd className="text-gray-700 dark:text-gray-300">{incident.assignedTo ?? 'Unassigned'}</dd>
+              <dt className="font-semibold text-gray-900">Assigned To</dt>
+              <dd className="text-gray-700">{incident.assignedTo ?? 'Unassigned'}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900 dark:text-gray-100">Created</dt>
-              <dd className="text-gray-700 dark:text-gray-300">{formatDateLabel(incident.createdAt)}</dd>
+              <dt className="font-semibold text-gray-900">Created</dt>
+              <dd className="text-gray-700">{formatDateLabel(incident.createdAt)}</dd>
             </div>
             <div>
-              <dt className="font-semibold text-gray-900 dark:text-gray-100">Last Updated</dt>
-              <dd className="text-gray-700 dark:text-gray-300">{formatDateLabel(incident.updatedAt)}</dd>
+              <dt className="font-semibold text-gray-900">Last Updated</dt>
+              <dd className="text-gray-700">{formatDateLabel(incident.updatedAt)}</dd>
             </div>
           </dl>
 
@@ -414,15 +414,15 @@ export default function IncidentDetailPage() {
           {scanDetail ? (
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Scan ID</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{scanDetail.scan.id}</dd>
+                <dt className="font-semibold text-gray-900">Scan ID</dt>
+                  <dd className="text-gray-700">{scanDetail.scan.id}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Type</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{scanDetail.scan.type}</dd>
+                <dt className="font-semibold text-gray-900">Type</dt>
+                <dd className="text-gray-700">{scanDetail.scan.type}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Status</dt>
+                <dt className="font-semibold text-gray-900">Status</dt>
                 <dd>
                   <StatusBadge tone={scanStatusTone[scanDetail.scan.status] ?? 'neutral'}>
                     {scanDetail.scan.status}
@@ -430,12 +430,12 @@ export default function IncidentDetailPage() {
                 </dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Started</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{formatDateLabel(scanDetail.scan.startedAt)}</dd>
+                <dt className="font-semibold text-gray-900">Started</dt>
+                <dd className="text-gray-700">{formatDateLabel(scanDetail.scan.startedAt)}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Devices Scanned</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{scanDetail.scan.totalDevices}</dd>
+                <dt className="font-semibold text-gray-900">Devices Scanned</dt>
+                <dd className="text-gray-700">{scanDetail.scan.totalDevices}</dd>
               </div>
             </dl>
           ) : (
@@ -447,32 +447,32 @@ export default function IncidentDetailPage() {
           {deviceDetail ? (
             <dl className="space-y-3 text-sm">
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Name</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.name ?? '—'}</dd>
+                <dt className="font-semibold text-gray-900">Name</dt>
+                <dd className="text-gray-700">{deviceDetail.name ?? '—'}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Vendor</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.vendor}</dd>
+                <dt className="font-semibold text-gray-900">Vendor</dt>
+                <dd className="text-gray-700">{deviceDetail.vendor}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Product</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.product}</dd>
+                <dt className="font-semibold text-gray-900">Product</dt>
+                <dd className="text-gray-700">{deviceDetail.product}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Version</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.version}</dd>
+                <dt className="font-semibold text-gray-900">Version</dt>
+                <dd className="text-gray-700">{deviceDetail.version}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">IP Address</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.ip ?? '—'}</dd>
+                <dt className="font-semibold text-gray-900">IP Address</dt>
+                <dd className="text-gray-700">{deviceDetail.ip ?? '—'}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">Serial</dt>
-                <dd className="text-gray-700 dark:text-gray-300">{deviceDetail.serial}</dd>
+                <dt className="font-semibold text-gray-900">Serial</dt>
+                <dd className="text-gray-700">{deviceDetail.serial}</dd>
               </div>
               <div>
-                <dt className="font-semibold text-gray-900 dark:text-gray-100">State</dt>
-                <dd className="text-gray-700 dark:text-gray-300 capitalize">{deviceDetail.state}</dd>
+                <dt className="font-semibold text-gray-900">State</dt>
+                <dd className="text-gray-700 capitalize">{deviceDetail.state}</dd>
               </div>
               <div>
                 <dt className="font-semibold text-gray-900">Last Scan</dt>
@@ -499,8 +499,8 @@ export default function IncidentDetailPage() {
               </div>
               {deviceDetail.cpe && (
                 <div>
-                  <dt className="font-semibold text-gray-900 dark:text-gray-100">CPE</dt>
-                  <dd className="text-gray-700 dark:text-gray-300 font-mono text-xs">{deviceDetail.cpe}</dd>
+                  <dt className="font-semibold text-gray-900">CPE</dt>
+                  <dd className="text-gray-700 font-mono text-xs">{deviceDetail.cpe}</dd>
                 </div>
               )}
             </dl>
@@ -523,7 +523,12 @@ export default function IncidentDetailPage() {
                   <p className="text-sm text-gray-700">
                     Last updated {formatDateLabel(incident.updatedAt)}
                   </p>
-                  <StatusBadge tone="critical">High Priority</StatusBadge>
+                  {(() => {
+                    const count = typeof deviceResult.cveCount === 'number' ? deviceResult.cveCount : deviceResult.cves.length;
+                    const label = count >= 3 ? 'High Priority' : count >= 1 ? 'Medium Priority' : 'Low Priority';
+                    const tone: ComponentProps<typeof StatusBadge>['tone'] = count >= 3 ? 'critical' : count >= 1 ? 'warning' : 'safe';
+                    return <StatusBadge tone={tone}>{label}</StatusBadge>;
+                  })()}
                 </div>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {deviceResult.cves.map((cve) => (
@@ -619,6 +624,9 @@ export default function IncidentDetailPage() {
                                 }
                               : undefined;
 
+                            let template = 'default';
+                            try { const t = localStorage.getItem('reportTemplate'); if (t) template = t; } catch {}
+
                             const blob = await generatePdfReport(
                               vendor,
                               product,
@@ -626,7 +634,7 @@ export default function IncidentDetailPage() {
                               cves,
                               analysisResult,
                               scanMeta,
-                              { generatedAt, locale, timeZone },
+                              { generatedAt, locale, timeZone, template },
                             );
 
                             const url = URL.createObjectURL(blob);
@@ -656,12 +664,12 @@ export default function IncidentDetailPage() {
                           setShowLangModal(true);
                         }}
                       >
-                        Resumen por la IA
+                        AI-assisted summary
                       </CoalButton>
 
                       {showLangModal && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-                          <div className="relative bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 min-w-[300px] max-w-[90vw] text-center">
+                          <div className="relative bg-white rounded-xl shadow-2xl p-6 min-w-[300px] max-w-[90vw] text-center">
                             <button
                               aria-label="Close"
                               className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
@@ -672,7 +680,7 @@ export default function IncidentDetailPage() {
                             >
                               ✕
                             </button>
-                            <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">Seleccione el idioma</h3>
+                            <h3 className="text-lg font-bold mb-4 text-gray-900">Select the language</h3>
                             <div className="flex gap-4 justify-center mb-4">
                               <button
                                 className="px-4 py-2 rounded-lg bg-amber-500 text-white font-semibold hover:bg-amber-600"
@@ -693,7 +701,7 @@ export default function IncidentDetailPage() {
                                 English
                               </button>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-300">Se reproducirá un resumen corto y amigable en el idioma seleccionado.</p>
+                            <p className="text-sm text-gray-600">A short and friendly summary will be played in the selected language.</p>
                           </div>
                         </div>
                       )}
@@ -707,7 +715,7 @@ export default function IncidentDetailPage() {
                         }}
                         disabled={!speaking}
                       >
-                        Parar voz
+                        Stop AI-assisted summary
                       </CoalButton>
                     </div>
                   </div>
@@ -723,11 +731,11 @@ export default function IncidentDetailPage() {
         <form className="space-y-5" onSubmit={handleUpdate}>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Status</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Status</label>
               <select
                 value={status}
                 onChange={(event) => setStatus(event.target.value as IncidentStatus)}
-                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               >
                 {statusOrder.map((s) => (
                   <option key={s} value={s}>
@@ -737,31 +745,31 @@ export default function IncidentDetailPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Assignee</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Assignee</label>
               <input
                 type="text"
                 value={assignee ?? ''}
                 onChange={(event) => setAssignee(event.target.value || null)}
                 placeholder="Add owner (optional)"
-                className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 dark:text-gray-400">Comment</label>
+            <label className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">Comment</label>
             <textarea
               value={comment}
               onChange={(event) => setComment(event.target.value)}
               rows={4}
               placeholder="Document mitigation steps"
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
           {formMessage ? (
-            <p className="rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-sm text-gray-700 dark:text-gray-300">{formMessage}</p>
+            <p className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700">{formMessage}</p>
           ) : null}
           <div className="flex items-center justify-between">
-            <p className="text-xs text-gray-500 dark:text-gray-400">Last updated {formatDateLabel(incident.updatedAt)}</p>
+            <p className="text-xs text-gray-500">Last updated {formatDateLabel(incident.updatedAt)}</p>
             <CoalButton type="submit" isLoading={mutating}>
               Apply changes
             </CoalButton>
@@ -772,18 +780,18 @@ export default function IncidentDetailPage() {
       {/* Timeline */}
       <CoalCard title="Incident Timeline" subtitle="History of status changes and comments">
         {history.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">No history yet.</p>
+          <p className="text-sm text-gray-500">No history yet.</p>
         ) : (
           <ul className="space-y-3">
             {history.map((entry) => (
-              <li key={entry.id} className="rounded-md border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3">
+              <li key={entry.id} className="rounded-md border border-gray-100 bg-gray-50 px-4 py-3">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-gray-100">
+                    <p className="font-semibold text-gray-900">
                       Status: {statusLabel(entry.fromStatus || 'N/A')} → {statusLabel(entry.toStatus)}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{formatDateLabel(entry.timestamp)}</p>
-                    {entry.comment && <p className="mt-2 text-gray-700 dark:text-gray-300">{entry.comment}</p>}
+                    <p className="text-sm text-gray-500">{formatDateLabel(entry.timestamp)}</p>
+                    {entry.comment && <p className="mt-2 text-gray-700">{entry.comment}</p>}
                   </div>
                 </div>
               </li>

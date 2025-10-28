@@ -29,12 +29,13 @@ export async function generateReport(
   version: string,
   cves: CVE[],
   analysis?: VulnerabilityAnalysis,
+  template?: string,
 ) {
   const resp = await fetch(`/api/reports/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ vendor, product, version, cves, analysis }),
+    body: JSON.stringify({ vendor, product, version, cves, analysis, template }),
   });
 
   if (!resp.ok) {
@@ -53,7 +54,7 @@ export async function generatePdfReport(
   cves: CVE[] | string[],
   analysis: VulnerabilityAnalysis | null,
   scan?: { id: string; type: string; status: string; startedAt: string; totalDevices?: number },
-  options?: { generatedAt?: string; locale?: string; timeZone?: string },
+  options?: { generatedAt?: string; locale?: string; timeZone?: string; template?: string },
 ) {
   const resp = await fetch(`/api/reports/pdf`, {
     method: "POST",

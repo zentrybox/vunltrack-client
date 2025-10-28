@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { analyzeWithClaude, generateReport } from "@/lib/claudeClient";
 import type { VulnerabilityAnalysis, CVE, ScanResultRecord } from "@/lib/types";
 
@@ -31,9 +31,30 @@ export default function ScansPage() {
   const [scanDetail, setScanDetail] = useState<ScanDetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
-  const [deviceAnalyses, setDeviceAnalyses] = useState<Record<string, VulnerabilityAnalysis | null>>({});
+  const [deviceAnalyses, setDeviceAnalyses] = useState<Record<string, VulnerabilityAnalysis | null>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const saved = localStorage.getItem("deviceAnalyses");
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportTarget, setExportTarget] = useState<ScanResultRecord | null>(null);
+
+  // Persist analyses across navigation using localStorage
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("deviceAnalyses", JSON.stringify(deviceAnalyses));
+    } catch {
+      // ignore
+    }
+  }, [deviceAnalyses]);
 
   const selectableDevices = useMemo(
     () => devices.slice().sort((a, b) => (a.name ?? a.product).localeCompare(b.name ?? b.product)),
@@ -85,9 +106,102 @@ export default function ScansPage() {
     }
   };
 
+  // helpers to export
+  const triggerDownload = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const buildCsv = (result: ScanResultRecord) => {
+    const device = devices.find(d => d.id === result.deviceId);
+    const analysis = deviceAnalyses[result.deviceId] || null;
+    const headers = [
+      "deviceId",
+      "vendor",
+      "product",
+      "version",
+      "cveCount",
+      "cves",
+      "riskLevel",
+      "summary",
+      "recommendations",
+    ];
+    const cves = (result.cves || []).join(";");
+    const recommendations = (analysis?.recommendations || []).join(" | ");
+    const row = [
+      result.deviceId,
+      device?.vendor ?? "",
+      device?.product ?? "",
+      device?.version ?? "",
+      String(result.cveCount ?? (result.cves?.length ?? 0)),
+      cves,
+      analysis?.riskLevel ?? "",
+      (analysis?.summary ?? "").replace(/\n/g, " ").replace(/"/g, '""'),
+      recommendations.replace(/\n/g, " ").replace(/"/g, '""'),
+    ];
+    const csv = [headers.join(","), row.map(v => `"${String(v)}"`).join(",")].join("\n");
+    return new Blob([csv], { type: "text/csv;charset=utf-8" });
+  };
+
+  const openExportModal = (result: ScanResultRecord) => {
+    setExportTarget(result);
+    setExportModalOpen(true);
+  };
+
+  const closeExportModal = () => {
+    setExportModalOpen(false);
+    setExportTarget(null);
+  };
+
+  const handleExportJSON = async () => {
+    if (!exportTarget) return;
+    setExporting(true);
+    try {
+      const device = devices.find(d => d.id === exportTarget.deviceId);
+      const cves: CVE[] = (exportTarget.cves || []).map((c: string) => ({ cveId: c }));
+      const analysis = deviceAnalyses[exportTarget.deviceId] ?? undefined;
+      let template = 'default';
+      try { const t = localStorage.getItem('reportTemplate'); if (t) template = t; } catch {}
+      const report = await generateReport(
+        device?.vendor ?? "",
+        device?.product ?? "",
+        device?.version ?? "",
+        cves,
+        analysis,
+        template,
+      );
+      const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
+      triggerDownload(blob, `report-${report.id}.json`);
+      closeExportModal();
+    } catch (err) {
+      setAnalysisError(err instanceof Error ? err.message : "Failed to generate report");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportCSV = async () => {
+    if (!exportTarget) return;
+    try {
+      const blob = buildCsv(exportTarget);
+      triggerDownload(blob, `report-${exportTarget.deviceId}.csv`);
+      closeExportModal();
+    } catch (err) {
+      setAnalysisError(err instanceof Error ? err.message : "Failed to export CSV");
+    }
+  };
+
+  // Note: loader handled in state initializer; saver defined earlier
+
   return (
     <div className="space-y-8">
-      <section className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+      <section className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
         <CoalCard
           title="Start new scan"
           subtitle="Choose devices and launch an on-demand exposure sweep"
@@ -225,64 +339,38 @@ export default function ScansPage() {
                     align: "right",
                     render: (result) => (
                       <div className="flex items-center gap-2">
+                        {!deviceAnalyses[result.deviceId] && (
+                          <CoalButton
+                            variant="ghost"
+                            size="sm"
+                            onClick={async () => {
+                              setAnalysisError(null);
+                              setAnalysisLoading(true);
+                              try {
+                                const scanRes = result as ScanResultRecord;
+                                const cves: CVE[] = (scanRes.cves || []).map((c: string) => ({ cveId: c }));
+                                const device = devices.find(d => d.id === result.deviceId);
+                                const analysis = await analyzeWithClaude(
+                                  device?.vendor ?? "",
+                                  device?.product ?? "",
+                                  device?.version ?? "",
+                                  cves,
+                                );
+                                setDeviceAnalyses((prev) => ({ ...prev, [result.deviceId]: analysis }));
+                              } catch (err) {
+                                setAnalysisError(err instanceof Error ? err.message : "Failed to analyze");
+                              } finally {
+                                setAnalysisLoading(false);
+                              }
+                            }}
+                          >
+                            Analyze
+                          </CoalButton>
+                        )}
                         <CoalButton
                           variant="ghost"
                           size="sm"
-                          onClick={async () => {
-                            // run analysis for this device
-                            setAnalysisError(null);
-                            setAnalysisLoading(true);
-                            try {
-                              // use the cves from the scan result row
-                              const scanRes = result as ScanResultRecord;
-                              const cves: CVE[] = (scanRes.cves || []).map((c: string) => ({ cveId: c }));
-                              const device = devices.find(d => d.id === result.deviceId);
-                              const analysis = await analyzeWithClaude(
-                                device?.vendor ?? "",
-                                device?.product ?? "",
-                                device?.version ?? "",
-                                cves,
-                              );
-                              setDeviceAnalyses((prev) => ({ ...prev, [result.deviceId]: analysis }));
-                            } catch (err) {
-                              setAnalysisError(err instanceof Error ? err.message : "Failed to analyze");
-                            } finally {
-                              setAnalysisLoading(false);
-                            }
-                          }}
-                        >
-                          Analyze
-                        </CoalButton>
-                        <CoalButton
-                          variant="ghost"
-                          size="sm"
-                          onClick={async () => {
-                            try {
-                              const scanRes = result as ScanResultRecord;
-                              const cves: CVE[] = (scanRes.cves || []).map((c: string) => ({ cveId: c }));
-                              const device = devices.find(d => d.id === result.deviceId);
-                              const analysis = deviceAnalyses[result.deviceId] ?? undefined;
-                              const report = await generateReport(
-                                device?.vendor ?? "",
-                                device?.product ?? "",
-                                device?.version ?? "",
-                                cves,
-                                analysis,
-                              );
-                              // download as JSON
-                              const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
-                              const url = URL.createObjectURL(blob);
-                              const a = document.createElement("a");
-                              a.href = url;
-                              a.download = `report-${report.id}.json`;
-                              document.body.appendChild(a);
-                              a.click();
-                              a.remove();
-                              URL.revokeObjectURL(url);
-                            } catch (err) {
-                              setAnalysisError(err instanceof Error ? err.message : "Failed to generate report");
-                            }
-                          }}
+                          onClick={() => openExportModal(result as ScanResultRecord)}
                         >
                           Export
                         </CoalButton>
@@ -334,6 +422,22 @@ export default function ScansPage() {
           )}
         </CoalCard>
       </section>
+
+      {exportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900">Export selected device results</h3>
+            <p className="mt-1 text-sm text-gray-600">Choose the format you prefer for your export.</p>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <CoalButton variant="secondary" onClick={handleExportCSV} disabled={exporting}>Export CSV</CoalButton>
+              <CoalButton variant="primary" onClick={handleExportJSON} disabled={exporting}>Export JSON</CoalButton>
+            </div>
+            <div className="mt-4 text-right">
+              <CoalButton variant="ghost" size="sm" onClick={closeExportModal} disabled={exporting}>Cancel</CoalButton>
+            </div>
+          </div>
+        </div>
+      )}
 
       <CoalCard
         title="Scan history"

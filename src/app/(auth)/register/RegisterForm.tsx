@@ -21,7 +21,7 @@ export default function RegisterForm() {
       <form action={formAction} className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label htmlFor="name" className="text-sm font-semibold text-gray-700">
               Your name
             </label>
             <input
@@ -31,13 +31,13 @@ export default function RegisterForm() {
               required
               placeholder="Ada Lovelace"
               autoComplete="name"
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
           <div className="space-y-2">
             <label
               htmlFor="tenantName"
-              className="text-sm font-semibold text-gray-700 dark:text-gray-300"
+              className="text-sm font-semibold text-gray-700"
             >
               Tenant name
             </label>
@@ -47,12 +47,12 @@ export default function RegisterForm() {
               type="text"
               required
               placeholder="Sentinel Networks"
-              className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <label htmlFor="email" className="text-sm font-semibold text-gray-700">
             Work email
           </label>
           <input
@@ -62,11 +62,11 @@ export default function RegisterForm() {
             required
             placeholder="you@sentinel.io"
             autoComplete="email"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <label htmlFor="password" className="text-sm font-semibold text-gray-700">
             Password
           </label>
           <input
@@ -77,7 +77,7 @@ export default function RegisterForm() {
             minLength={10}
             placeholder="••••••••••"
             autoComplete="new-password"
-            className="w-full rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-600"
+            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
           />
         </div>
         {state.status === "error" ? (
@@ -89,7 +89,7 @@ export default function RegisterForm() {
         <CoalButton type="submit" className="w-full" isLoading={isPending} disabled={isPending}>
           Launch Command Center
         </CoalButton>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+  <p className="text-center text-sm text-gray-600">
           Already onboarded?{" "}
           <Link href="/login" className="text-blue-600 hover:underline">
             Return to login

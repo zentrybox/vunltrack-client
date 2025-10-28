@@ -7,7 +7,8 @@ import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
-import { useReports } from "@/hooks/useReports";
+import { useAuth } from "@/hooks/useAuth";
+import { useUsers } from "@/hooks/useUsers";
 import { useSubscription } from "@/hooks/useSubscription";
 import type { SubscriptionSimulation, SubscriptionStatus } from "@/lib/types";
 import { formatDateLabel } from "@/lib/utils";
@@ -24,35 +25,18 @@ const quickLinks = [
     description: "Coordinate remediation steps across the team.",
   },
   {
-    href: "/scheduling",
-    label: "Scheduling",
-    description: "Automate recurring sweeps across device groups.",
-  },
-  {
     href: "/users",
     label: "User directory",
     description: "Invite collaborators and manage access roles.",
   },
 ];
 
-const auditLog = [
-  {
-    id: "log-1",
-    actor: "Sasha Moreno",
-    action: "Updated scan cadence",
-    timestamp: "2025-10-02T12:21:00.000Z",
-  },
-  {
-    id: "log-2",
-    actor: "Alex Singh",
-    action: "Invited collaborator",
-    timestamp: "2025-10-02T10:12:00.000Z",
-  },
-];
+// Audit entries will be derived from current admin inviting collaborators.
 
 const plans: SubscriptionStatus["plan"][] = ["BASIC", "STANDARD", "ENTERPRISE"];
 
 export default function SettingsPage() {
+  const { user: authUser } = useAuth();
   const {
     subscription,
     loading: subscriptionLoading,
@@ -61,12 +45,8 @@ export default function SettingsPage() {
     mutating: subscriptionMutating,
     refresh: refreshSubscription,
   } = useSubscription();
-  const {
-    reports,
-    loading: reportsLoading,
-    error: reportsError,
-    refresh: refreshReports,
-  } = useReports();
+  const { users: collaborators } = useUsers();
+  
 
   const [targetPlan, setTargetPlan] = useState<SubscriptionStatus["plan"]>("STANDARD");
   const [simulation, setSimulation] = useState<SubscriptionSimulation | null>(null);
@@ -256,89 +236,48 @@ export default function SettingsPage() {
         </div>
       </CoalCard>
 
-      <CoalCard
-        title="Reports library"
-        subtitle="Executive-ready exports and compliance packages"
-        action={
-          <CoalButton variant="ghost" size="sm" onClick={refreshReports}>
-            Refresh
-          </CoalButton>
-        }
-      >
-        {reportsError ? (
-          <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
-            {reportsError}
-          </p>
-        ) : null}
-        <CoalTable
-          data={reports}
-          isLoading={reportsLoading}
-          columns={[
-            {
-              key: "name",
-              header: "Report",
-              render: (report) => (
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold text-gray-900">{report.name}</p>
-                  <p className="text-xs text-gray-500">ID: {report.id}</p>
-                </div>
-              ),
-            },
-            {
-              key: "format",
-              header: "Format",
-            },
-            {
-              key: "generatedAt",
-              header: "Generated",
-              render: (report) => (
-                <span className="text-xs text-gray-500">{formatDateLabel(report.generatedAt)}</span>
-              ),
-            },
-            {
-              key: "actions",
-              header: "",
-              align: "right",
-              render: () => (
-                <CoalButton variant="ghost" size="sm">
-                  Download
-                </CoalButton>
-              ),
-            },
-          ]}
-          emptyState="No reports have been generated yet. Configure schedules to receive automated exports."
-        />
-      </CoalCard>
+      {/* Reports library templates hidden per request; incidents flow will use its existing template logic. */}
 
-      <CoalCard title="Audit log" subtitle="Recent administrative activity">
-        <CoalTable
-          data={auditLog}
-          isLoading={false}
-          columns={[
-            {
-              key: "actor",
-              header: "Actor",
-              render: (item) => (
-                <span className="text-sm text-gray-900">{item.actor}</span>
-              ),
-            },
-            {
-              key: "action",
-              header: "Action",
-              render: (item) => (
-                <span className="text-xs text-gray-500">{item.action}</span>
-              ),
-            },
-            {
-              key: "timestamp",
-              header: "Timestamp",
-              render: (item) => (
-                <span className="text-xs text-gray-500">{formatDateLabel(item.timestamp)}</span>
-              ),
-            },
-          ]}
-        />
-      </CoalCard>
+      {/* Audit log: visible only to account administrator (ROOT/ADMIN) */}
+      {authUser && (authUser.role === 'ROOT' || authUser.role === 'ADMIN') ? (
+        <CoalCard title="Audit log" subtitle="Recent administrative activity">
+          <CoalTable
+            data={collaborators
+              .filter((u) => u.id !== authUser.id)
+              .map((u) => ({
+                id: u.id,
+                actor: authUser.name,
+                action: `Invited ${u.name || u.email}`,
+                timestamp: u.createdAt,
+              }))}
+            isLoading={false}
+            columns={[
+              {
+                key: "actor",
+                header: "Actor",
+                render: (item) => (
+                  <span className="text-sm text-gray-900">{item.actor}</span>
+                ),
+              },
+              {
+                key: "action",
+                header: "Action",
+                render: (item) => (
+                  <span className="text-xs text-gray-500">{item.action}</span>
+                ),
+              },
+              {
+                key: "timestamp",
+                header: "Timestamp",
+                render: (item) => (
+                  <span className="text-xs text-gray-500">{formatDateLabel(item.timestamp)}</span>
+                ),
+              },
+            ]}
+            emptyState="No invitations yet."
+          />
+        </CoalCard>
+      ) : null}
     </div>
   );
 }

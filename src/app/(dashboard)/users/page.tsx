@@ -6,6 +6,7 @@ import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
+import { useAuth } from "@/hooks/useAuth";
 import { useUsers } from "@/hooks/useUsers";
 import type { CreateCollaboratorPayload } from "@/lib/types";
 import { formatDateLabel } from "@/lib/utils";
@@ -17,6 +18,7 @@ const initialForm: CreateCollaboratorPayload = {
 };
 
 export default function UsersPage() {
+  const { user: authUser, loading: authLoading } = useAuth();
   const { users, loading, mutating, error, addUser, removeUser } = useUsers();
   const [form, setForm] = useState<CreateCollaboratorPayload>(initialForm);
   const [formError, setFormError] = useState<string | null>(null);
@@ -31,6 +33,19 @@ export default function UsersPage() {
     await addUser(form);
     setForm(initialForm);
   };
+
+  // If not admin/root, show access message only
+  if (!authLoading && authUser && authUser.role !== 'ROOT' && authUser.role !== 'ADMIN') {
+    return (
+      <div className="space-y-8">
+        <CoalCard title="User directory" subtitle="Collaborators and access">
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            You do not have access to this section. Only the account administrator can manage the user directory.
+          </div>
+        </CoalCard>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
