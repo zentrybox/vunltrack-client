@@ -7,6 +7,8 @@ import CoalButton from "@/components/CoalButton";
 import CoalCard from "@/components/CoalCard";
 import CoalTable from "@/components/CoalTable";
 import StatusBadge from "@/components/StatusBadge";
+import { useAuth } from "@/hooks/useAuth";
+import { useUsers } from "@/hooks/useUsers";
 import { useSubscription } from "@/hooks/useSubscription";
 import type { SubscriptionSimulation, SubscriptionStatus } from "@/lib/types";
 import { formatDateLabel } from "@/lib/utils";
@@ -29,24 +31,12 @@ const quickLinks = [
   },
 ];
 
-const auditLog = [
-  {
-    id: "log-1",
-    actor: "Sasha Moreno",
-    action: "Updated scan cadence",
-    timestamp: "2025-10-02T12:21:00.000Z",
-  },
-  {
-    id: "log-2",
-    actor: "Alex Singh",
-    action: "Invited collaborator",
-    timestamp: "2025-10-02T10:12:00.000Z",
-  },
-];
+// Audit entries will be derived from current admin inviting collaborators.
 
 const plans: SubscriptionStatus["plan"][] = ["BASIC", "STANDARD", "ENTERPRISE"];
 
 export default function SettingsPage() {
+  const { user: authUser } = useAuth();
   const {
     subscription,
     loading: subscriptionLoading,
@@ -55,6 +45,7 @@ export default function SettingsPage() {
     mutating: subscriptionMutating,
     refresh: refreshSubscription,
   } = useSubscription();
+  const { users: collaborators } = useUsers();
   
 
   const [targetPlan, setTargetPlan] = useState<SubscriptionStatus["plan"]>("STANDARD");
@@ -247,35 +238,46 @@ export default function SettingsPage() {
 
       {/* Reports library templates hidden per request; incidents flow will use its existing template logic. */}
 
-      <CoalCard title="Audit log" subtitle="Recent administrative activity">
-        <CoalTable
-          data={auditLog}
-          isLoading={false}
-          columns={[
-            {
-              key: "actor",
-              header: "Actor",
-              render: (item) => (
-                <span className="text-sm text-gray-900">{item.actor}</span>
-              ),
-            },
-            {
-              key: "action",
-              header: "Action",
-              render: (item) => (
-                <span className="text-xs text-gray-500">{item.action}</span>
-              ),
-            },
-            {
-              key: "timestamp",
-              header: "Timestamp",
-              render: (item) => (
-                <span className="text-xs text-gray-500">{formatDateLabel(item.timestamp)}</span>
-              ),
-            },
-          ]}
-        />
-      </CoalCard>
+      {/* Audit log: visible only to account administrator (ROOT/ADMIN) */}
+      {authUser && (authUser.role === 'ROOT' || authUser.role === 'ADMIN') ? (
+        <CoalCard title="Audit log" subtitle="Recent administrative activity">
+          <CoalTable
+            data={collaborators
+              .filter((u) => u.id !== authUser.id)
+              .map((u) => ({
+                id: u.id,
+                actor: authUser.name,
+                action: `Invited ${u.name || u.email}`,
+                timestamp: u.createdAt,
+              }))}
+            isLoading={false}
+            columns={[
+              {
+                key: "actor",
+                header: "Actor",
+                render: (item) => (
+                  <span className="text-sm text-gray-900">{item.actor}</span>
+                ),
+              },
+              {
+                key: "action",
+                header: "Action",
+                render: (item) => (
+                  <span className="text-xs text-gray-500">{item.action}</span>
+                ),
+              },
+              {
+                key: "timestamp",
+                header: "Timestamp",
+                render: (item) => (
+                  <span className="text-xs text-gray-500">{formatDateLabel(item.timestamp)}</span>
+                ),
+              },
+            ]}
+            emptyState="No invitations yet."
+          />
+        </CoalCard>
+      ) : null}
     </div>
   );
 }

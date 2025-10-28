@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, memo, useCallback } from "react";
-import Link from "next/link";
+// import Link from "next/link";
 
-import CoalButton from "@/components/CoalButton";
+// import CoalButton from "@/components/CoalButton";
 import { cn } from "@/lib/utils";
 
 interface TopBarProps {
@@ -54,11 +54,7 @@ const TopBar = memo(function TopBar({ userName, onSignOut }: TopBarProps) {
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <Link href="/scans">
-          <CoalButton variant="primary" size="sm">
-            Start scan
-          </CoalButton>
-        </Link>
+        {/* Start scan button hidden per request */}
         <div className="relative">
           <button
             type="button"

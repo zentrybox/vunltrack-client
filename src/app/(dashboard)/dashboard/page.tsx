@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ComponentProps } from "react";
 
@@ -50,8 +51,21 @@ const toneTextClass: Record<
 
 export default function DashboardPage() {
 	const router = useRouter();
-	const { metrics, queue, scans, incidents, systemMetrics, loading, error } =
+	const { metrics, scans, incidents, systemMetrics, loading, liveUpdating, lastCompletedScan, ackLastCompleted, refresh } =
 		useDashboard();
+
+		const [showToast, setShowToast] = useState(false);
+
+		useEffect(() => {
+			if (lastCompletedScan) {
+				setShowToast(true);
+				const t = setTimeout(() => {
+					setShowToast(false);
+					ackLastCompleted();
+				}, 4000);
+				return () => clearTimeout(t);
+			}
+		}, [lastCompletedScan, ackLastCompleted]);
 
 	const systemTiles = [
 		{
@@ -101,6 +115,26 @@ export default function DashboardPage() {
 
 	return (
 		<div className="space-y-8">
+						{/* Live updating banner and completion toast */}
+						<div className="relative">
+							{liveUpdating ? (
+								<div className="mb-2 inline-flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs text-blue-700">
+									<span className="relative flex h-2 w-2">
+										<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
+										<span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
+									</span>
+									Live updating…
+								</div>
+							) : null}
+							{showToast && lastCompletedScan ? (
+								<div className="pointer-events-auto mb-2 inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs text-emerald-700 shadow-sm">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+										<path fillRule="evenodd" d="M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm3.28-9.78a.75.75 0 0 0-1.06-1.06L9 10.37 7.78 9.16a.75.75 0 1 0-1.06 1.06l1.75 1.75a.75.75 0 0 0 1.06 0l3.75-3.75Z" clipRule="evenodd" />
+									</svg>
+									Scan {lastCompletedScan.id} completed. Metrics updated.
+								</div>
+							) : null}
+						</div>
 			<section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 				{statCards.map((card) => (
 					<CoalCard key={card.id} className="relative overflow-hidden">
@@ -135,13 +169,22 @@ export default function DashboardPage() {
 					title="Recent scans"
 					subtitle="Monitor cadence and completion rates"
 					action={
-						<CoalButton
-							variant="secondary"
-							size="sm"
-							onClick={() => router.push("/scans")}
-						>
-							View scans
-						</CoalButton>
+						<div className="flex items-center gap-2">
+							<CoalButton
+								variant="ghost"
+								size="sm"
+								onClick={() => refresh()}
+							>
+								Refresh
+							</CoalButton>
+							<CoalButton
+								variant="secondary"
+								size="sm"
+								onClick={() => router.push("/scans")}
+							>
+								View scans
+							</CoalButton>
+						</div>
 					}
 				>
 					<CoalTable
@@ -210,7 +253,7 @@ export default function DashboardPage() {
 				</CoalCard>
 			</section>
 
-			<section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+			<section className="grid gap-6">
 				<CoalCard
 					title="Active incidents"
 					subtitle="Track exposures requiring attention"
@@ -271,82 +314,7 @@ export default function DashboardPage() {
 						emptyState="No incidents open."
 					/>
 				</CoalCard>
-				<CoalCard
-					title="Vulnerability queue"
-					subtitle="Prioritized exposures across your managed devices"
-					action={
-						<CoalButton variant="secondary" size="sm">
-							View all alerts
-						</CoalButton>
-					}
-				>
-					{error ? (
-						<p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-							{error}
-						</p>
-					) : (
-						<CoalTable
-							data={queue}
-							isLoading={loading}
-							columns={[
-								{
-									key: "title",
-									header: "Threat",
-									render: (item) => (
-										<div className="space-y-1">
-											<p className="text-sm font-semibold text-gray-900">
-												{item.title}
-											</p>
-											<p className="text-xs text-gray-500">
-												{item.device}
-											</p>
-										</div>
-									),
-								},
-								{
-									key: "severity",
-									header: "Severity",
-									render: (item) => (
-										<StatusBadge
-											tone={
-												item.severity === "CRITICAL"
-													? "critical"
-												: item.severity === "HIGH"
-												? "warning"
-												: item.severity === "MEDIUM"
-												? "info"
-												: item.severity === "LOW"
-												? "safe"
-												: "neutral"
-											}
-										>
-											{item.severity}
-										</StatusBadge>
-									),
-								},
-								{
-									key: "detectedAt",
-									header: "Detected",
-									render: (item) => (
-										<span className="text-xs text-gray-500">
-											{formatDateLabel(item.detectedAt)}
-										</span>
-									),
-								},
-								{
-									key: "status",
-									header: "Status",
-									render: (item) => (
-										<span className="text-xs font-semibold text-gray-800">
-											{item.status.replace("_", " ")}
-										</span>
-									),
-								},
-							]}
-							emptyState="All systems nominal."
-						/>
-					)}
-				</CoalCard>
+				{/* Vulnerability queue hidden per request */}
 			</section>
 		</div>
 	);
