@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 
 const variantStyles = {
   primary:
-    "bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-900/20 hover:from-blue-700 hover:to-cyan-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-blue-400 dark:from-blue-900 dark:via-blue-800 dark:to-cyan-700 dark:text-blue-100 dark:shadow-blue-900/40 dark:hover:from-blue-950 dark:hover:to-cyan-800",
+    "bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-900/20 hover:from-blue-700 hover:to-cyan-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-blue-400",
   secondary:
-    "border border-gray-700 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white shadow-md hover:from-gray-800 hover:to-gray-600 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-gray-500 dark:border-blue-900 dark:from-blue-950 dark:via-gray-900 dark:to-blue-900 dark:text-blue-100 dark:shadow-blue-900/40 dark:hover:from-blue-950 dark:hover:to-blue-900",
+    "border border-gray-700 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white shadow-md hover:from-gray-800 hover:to-gray-600 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-gray-500",
   ghost:
-    "border border-transparent bg-transparent text-blue-500 hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-300 dark:text-blue-300 dark:hover:bg-blue-950/30 dark:hover:text-blue-100",
+    "border border-transparent bg-transparent text-blue-500 hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-300",
   danger:
-    "bg-gradient-to-r from-red-600 via-red-500 to-orange-400 text-white shadow-lg shadow-red-900/20 hover:from-red-700 hover:to-orange-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-red-400 dark:from-red-900 dark:via-red-800 dark:to-orange-700 dark:text-orange-100 dark:shadow-red-900/40 dark:hover:from-red-950 dark:hover:to-orange-800",
+    "bg-gradient-to-r from-red-600 via-red-500 to-orange-400 text-white shadow-lg shadow-red-900/20 hover:from-red-700 hover:to-orange-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-red-400",
 } as const;
 
 const sizeStyles = {
