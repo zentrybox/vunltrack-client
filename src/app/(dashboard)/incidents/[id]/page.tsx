@@ -342,7 +342,7 @@ export default function IncidentDetailPage() {
             </div>
             <div>
               <dt className="font-semibold text-gray-900">Assigned To</dt>
-              <dd className="text-gray-700">{incident.assignedTo ?? 'Unassigned'}</dd>
+              <dd className="font-semibold text-slate-200">{incident.assignedTo ?? 'Unassigned'}</dd>
             </div>
             <div>
               <dt className="font-semibold text-gray-900">Created</dt>
@@ -701,7 +701,7 @@ export default function IncidentDetailPage() {
                                 English
                               </button>
                             </div>
-                            <p className="text-sm text-gray-600">A short and friendly summary will be played in the selected language.</p>
+                            <p className="text-sm text-slate-200">A short and friendly summary will be played in the selected language.</p>
                           </div>
                         </div>
                       )}

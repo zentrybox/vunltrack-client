@@ -7,19 +7,22 @@ import { cn } from "@/lib/utils";
 
 const variantStyles = {
   primary:
-    "bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 text-white shadow-lg shadow-blue-900/20 hover:from-blue-700 hover:to-cyan-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-blue-400",
+    "relative bg-gradient-to-r from-[var(--color-accent2)] to-[var(--color-accent1)] text-white shadow-[0_8px_24px_color-mix(in_srgb,var(--color-accent2)_22%,transparent)] hover:scale-[1.03] focus-visible:ring-2 ring-accent",
+  cta:
+    "relative bg-gradient-to-r from-[var(--color-accent2)] to-[var(--color-accent1)] text-white shadow-[0_10px_36px_color-mix(in_srgb,var(--color-accent2)_28%,transparent)] hover:shadow-[0_12px_42px_color-mix(in_srgb,var(--color-accent1)_28%,transparent)] hover:scale-[1.04] ring-accent",
   secondary:
-    "border border-gray-700 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 text-white shadow-md hover:from-gray-800 hover:to-gray-600 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-gray-500",
+    "relative border border-white/15 bg-white/5 text-white shadow-md hover:bg-white/10 hover:scale-[1.02] focus-visible:ring-2 ring-electric",
   ghost:
-    "border border-transparent bg-transparent text-blue-500 hover:bg-blue-50 hover:text-blue-700 focus-visible:ring-2 focus-visible:ring-blue-300",
+    "relative border border-transparent bg-transparent text-white/85 hover:bg-white/10 focus-visible:ring-2 ring-electric",
   danger:
-    "bg-gradient-to-r from-red-600 via-red-500 to-orange-400 text-white shadow-lg shadow-red-900/20 hover:from-red-700 hover:to-orange-500 hover:scale-[1.04] focus-visible:ring-2 focus-visible:ring-red-400",
+    "relative bg-[var(--color-accent2)] text-white shadow-[0_8px_24px_color-mix(in_srgb,var(--color-accent2)_22%,transparent)] hover:scale-[1.03] focus-visible:ring-2 ring-accent",
 } as const;
 
 const sizeStyles = {
-  md: "h-11 px-5 text-base",
   sm: "h-9 px-4 text-sm",
+  md: "h-11 px-5 text-base",
   lg: "h-12 px-6 text-lg",
+  xl: "h-14 px-7 text-lg",
   icon: "flex h-10 w-10 items-center justify-center p-0",
 } as const;
 
@@ -51,7 +54,7 @@ const CoalButton = forwardRef<HTMLButtonElement, CoalButtonProps>(
     ref,
   ) => {
     const composedClassName = cn(
-      "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-offset-2 select-none",
+      "group inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-offset-2 select-none",
       "will-change-transform will-change-shadow",
       "active:scale-[0.98]",
       variantStyles[variant],
@@ -70,6 +73,12 @@ const CoalButton = forwardRef<HTMLButtonElement, CoalButtonProps>(
         aria-live={isLoading ? "polite" : undefined}
         {...props}
       >
+        {/* Shine overlay */}
+        <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+          <span className="absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-12deg] bg-white/30 opacity-0 transition-opacity duration-200 group-hover:opacity-40" style={{
+            animation: "shine 1.2s linear 1",
+          }} />
+        </span>
         {isLoading ? (
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-transparent" />
         ) : (

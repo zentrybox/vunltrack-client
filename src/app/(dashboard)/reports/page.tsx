@@ -76,7 +76,7 @@ export default function ReportsPage() {
         title="Compliance templates"
         subtitle="Instantly align with SOC 2, ISO 27001, and PCI guidelines"
       >
-        <div className="space-y-4 text-sm text-gray-600">
+  <div className="space-y-4 text-sm text-slate-200">
           <p>
             Build tailored reports for auditors with curated evidence packages and device posture trends.
           </p>

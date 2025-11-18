@@ -4,6 +4,7 @@ import CoalSidebar from "@/components/CoalSidebar";
 import TopBar from "@/components/TopBar";
 import StatusBadge from "@/components/StatusBadge";
 import { requireSession } from "@/lib/auth";
+import AnimatedDashboardBackground from "@/components/AnimatedDashboardBackground";
 
 const navigation = [
   {
@@ -41,7 +42,7 @@ export default async function DashboardLayout({
 
   return (
     <>
-      <div className="hidden min-h-screen w-full bg-gray-100 text-gray-900 lg:flex">
+  <div className="hidden min-h-screen w-full bg-transparent text-gray-900 lg:flex">
         {/* Fixed Sidebar */}
         <div className="fixed left-0 top-0 z-40 h-screen w-[280px] flex-shrink-0">
           <CoalSidebar
@@ -59,7 +60,8 @@ export default async function DashboardLayout({
         </div>
 
         {/* Main Content Area */}
-        <div className="ml-[280px] flex min-h-screen flex-1 flex-col">
+        <div className="ml-[280px] flex min-h-screen flex-1 flex-col relative">
+          <AnimatedDashboardBackground />
           <TopBar userName={session.user?.name} />
           <main className="flex-1 overflow-y-auto px-6 pb-12 pt-10">
             <div className="mx-auto w-full max-w-[1440px] space-y-8">{children}</div>

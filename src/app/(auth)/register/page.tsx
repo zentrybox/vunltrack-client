@@ -12,12 +12,12 @@ export default function RegisterPage() {
           VulnTrack
         </p>
         <h1 className="text-2xl font-semibold text-gray-900">Bootstrap your VulnTrack tenant</h1>
-        <p className="mt-2 text-sm text-gray-600">
+  <p className="mt-2 text-sm text-slate-200">
           Provision your command center, then invite collaborators once inside.
         </p>
       </div>
       <RegisterForm />
-      <p className="text-sm text-gray-600">
+  <p className="text-sm text-slate-200">
         Questions? Ping the VulnTrack support channel for expedited setup.
       </p>
     </div>

@@ -20,7 +20,7 @@ export default function LoginForm() {
     >
       <form action={formAction} className="space-y-5">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="email" className="text-sm font-semibold text-slate-200">
             Email
           </label>
           <input
@@ -33,7 +33,7 @@ export default function LoginForm() {
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+          <label htmlFor="password" className="text-sm font-semibold text-slate-200">
             Password
           </label>
           <input
@@ -53,7 +53,7 @@ export default function LoginForm() {
         <CoalButton type="submit" className="w-full" isLoading={isPending} disabled={isPending}>
           Enter Command Center
         </CoalButton>
-  <p className="text-center text-sm text-gray-600">
+  <p className="text-center text-sm text-slate-200">
           First time tenant?{' '}
           <Link href="/register" className="text-blue-600 hover:underline">
             Create a root account

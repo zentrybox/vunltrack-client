@@ -79,7 +79,7 @@ export default function AutomationPage() {
         title="Automation policy"
         subtitle="Define escalation rules for detected vulnerabilities"
       >
-        <div className="space-y-4 text-sm text-gray-600">
+  <div className="space-y-4 text-sm text-slate-200">
           <p>
             Configure guardrails to automatically raise incidents, tag devices, or notify external systems when
             severity thresholds are reached. Integrate with Slack, PagerDuty, or SIEM targets.

@@ -2,11 +2,12 @@
 
 @layer base {
   :root {
-    color-scheme: light;
-    --surface-base: #f5f7fb;
-    --surface-accent: #eef2ff;
-    --surface-contrast: #ffffff;
-    --border-subtle: rgba(30, 64, 175, 0.08);
+    /* Corporate 4-color palette */
+    --color-bg: #0f172a; /* slate-900 */
+    --color-ink: #f8fafc; /* slate-50 */
+    --color-accent1: #2563eb; /* primary blue-600 */
+    --color-accent2: #0ea5a1; /* teal-500 (secondary/accent) */
+    color-scheme: dark;
   }
 
   html {
@@ -16,11 +17,8 @@
   body {
     min-height: 100vh;
     margin: 0;
-    background:
-      radial-gradient(circle at 0% 0%, var(--surface-accent), transparent 45%),
-      radial-gradient(circle at 100% 0%, rgba(191, 219, 254, 0.55), transparent 40%),
-      linear-gradient(180deg, var(--surface-base), #ffffff 65%);
-    color: #111827;
+    background: linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg) 100%);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background 0.3s, color 0.3s;
@@ -31,25 +29,100 @@
     text-decoration: none;
   }
 
-  /* Dark mode styles */
-  html.dark body {
-    background:
-      radial-gradient(circle at 0% 0%, #1e293b 60%, transparent 45%),
-      radial-gradient(circle at 100% 0%, #334155 55%, transparent 40%),
-      linear-gradient(180deg, #0f172a, #1e293b 65%);
-    color: #e2e8f0;
-  }
-  html.dark {
-    color-scheme: dark;
-    --surface-base: #0f172a;
-    --surface-accent: #1e293b;
-    --surface-contrast: #1e293b;
-    --border-subtle: rgba(191, 219, 254, 0.08);
-  }
+  /* Dark mode is default via color-scheme; no alt palette to keep to 4 colors */
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Glow rings using the two accents (corporate) */
+  .ring-electric { /* accent1 */
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent1) 35%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent1) 35%, transparent) inset;
+  }
+  .ring-accent { /* accent2 */
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent2) 35%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent2) 35%, transparent) inset;
+  }
+
+  /* Shimmer overlay (used in buttons or skeletons) */
+  .shimmer-line {
+    position: relative;
+    overflow: hidden;
+  }
+  .shimmer-line::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.6s linear infinite;
+  }
 }
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes radar-sweep {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+@keyframes shine {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+/* Scanlines overlay */
+.scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.04) 0px,
+    rgba(255,255,255,0.04) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+  opacity: 0.15;
+}
+
+/* Slow panning for background grid */
+@keyframes grid-pan {
+  0% { background-position: 0px 0px, 0px 0px; }
+  100% { background-position: 80px 40px, 40px 80px; }
+}
+
+/* Animated gradient sweep */
+@keyframes gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Small pulsing dot for badges */
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.35); opacity: 1; }
+}
+
+/* Motion accessibility: minimize animations when user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .scanlines::after {
+    display: none !important;
+  }
+}
+

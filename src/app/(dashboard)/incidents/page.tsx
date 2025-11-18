@@ -88,7 +88,7 @@ export default function IncidentsPage() {
               key: "assignedTo",
               header: "Owner",
               render: (incident) => (
-                <span className="text-xs text-gray-700">
+                <span className="text-xs font-semibold text-slate-200">
                   {incident.assignedTo ?? "Unassigned"}
                 </span>
               ),

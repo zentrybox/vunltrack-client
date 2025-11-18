@@ -127,7 +127,7 @@ export default function UsersPage() {
       <CoalCard title="Invite collaborator" subtitle="Manual enrollment">
         <form id="user-form" className="grid gap-4 md:grid-cols-3" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700" htmlFor="name">
+            <label className="text-sm font-semibold text-slate-200" htmlFor="name">
               Name
             </label>
             <input
@@ -140,7 +140,7 @@ export default function UsersPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700" htmlFor="email">
+            <label className="text-sm font-semibold text-slate-200" htmlFor="email">
               Email
             </label>
             <input
@@ -154,7 +154,7 @@ export default function UsersPage() {
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700" htmlFor="password">
+            <label className="text-sm font-semibold text-slate-200" htmlFor="password">
               Temporary password
             </label>
             <input

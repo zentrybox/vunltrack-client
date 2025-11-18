@@ -24,16 +24,18 @@ export default function CoalCard({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-gray-900/10 bg-gradient-to-br from-gray-50 via-white to-blue-50 shadow-xl transition-all duration-200 hover:shadow-2xl hover:-translate-y-1",
-        "group relative overflow-hidden",
+        "group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:-translate-y-1",
+        "text-white/90",
         className
       )}
     >
+      {/* Neon accent bar */}
+  <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[var(--color-accent2)] to-[var(--color-accent1)] opacity-80" />
       {hasHeader ? (
-  <header className="flex flex-wrap items-start justify-between gap-4 border-b border-gray-200 px-6 py-4 bg-gradient-to-r from-blue-50/40 via-white/60 to-blue-100/40">
+  <header className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 px-6 py-4 bg-white/5 backdrop-blur-sm">
           <div className="space-y-1 text-left">
               {typeof title === "string" ? (
-              <h3 className="text-xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+              <h3 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 {/* Puedes agregar un icono aquí si lo deseas */}
                 {title}
               </h3>
@@ -41,7 +43,7 @@ export default function CoalCard({
               title
             )}
               {subtitle ? (
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-500">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--color-accent1)]">
                 {subtitle}
               </p>
             ) : null}
@@ -50,16 +52,16 @@ export default function CoalCard({
         </header>
       ) : null}
 
-  <div className={cn("px-6 py-5 text-gray-800", footer ? "pb-2" : undefined)}>{children}</div>
+  <div className={cn("px-6 py-5", footer ? "pb-2" : undefined)}>{children}</div>
 
       {footer ? (
-        <footer className="border-t border-gray-200 px-6 py-4 text-sm text-gray-500 bg-white/60">
+        <footer className="border-t border-white/10 px-6 py-4 text-sm text-white/80 bg-white/5 backdrop-blur-sm">
           {footer}
         </footer>
       ) : null}
 
       {/* Animación decorativa de fondo */}
-  <span className="pointer-events-none absolute inset-0 z-0 opacity-0 group-hover:opacity-10 transition duration-300 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-400 via-blue-200 to-transparent" />
+      <span className="pointer-events-none absolute inset-0 z-0 opacity-0 transition duration-500 group-hover:opacity-20 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[var(--color-accent2)] to-transparent" />
     </section>
   );
 }
