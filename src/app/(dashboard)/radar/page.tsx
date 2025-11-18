@@ -16,7 +16,7 @@ export default function RadarPage() {
           <div className="space-y-4">
             <h3 className="text-base font-semibold text-gray-900">Signal map</h3>
             <HeatmapGrid />
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-200">
               Radar pulses highlight active sweeps. Hover nodes to inspect segments and schedule deep scans.
             </p>
           </div>

@@ -156,7 +156,7 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-200 font-semibold">
               Plans unlock higher device and user capacity, priority alerting, and dedicated support. Simulate changes
               before committing to ensure your tenant remains within limits.
             </p>
@@ -227,7 +227,7 @@ export default function SettingsPage() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">
               Plan capabilities
             </p>
-            <ul className="space-y-3 text-sm text-gray-600">
+            <ul className="space-y-3 text-sm text-slate-200">
               <li>• API rate limits scale with plan tier.</li>
               <li>• Dedicated Slack channel available on ENTERPRISE.</li>
               <li>• Incident SLA drops to 30 minutes on STANDARD and above.</li>

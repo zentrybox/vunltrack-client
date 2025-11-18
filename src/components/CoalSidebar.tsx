@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMemo, memo, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
+import { Icon } from "@/components/icons";
 
 export interface SidebarItem {
   label: string;
@@ -29,23 +30,26 @@ const SidebarItem = memo(function SidebarItem({
     <Link
       href={item.href}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-150",
-        "hover:bg-gray-900/10 hover:scale-[1.02]",
+        "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-150",
+        "hover:bg-white/10 hover:scale-[1.02]",
         isActive
-          ? "bg-gray-900/5 text-gray-900 border-l-4 border-gray-900 shadow"
-          : "text-gray-600 border-l-4 border-transparent",
+          ? "bg-white/10 text-white border-l-4 border-[var(--neon-magenta)] shadow ring-1 ring-[var(--neon-magenta)]/10"
+          : "text-white/85 border-l-4 border-transparent",
       )}
       data-active={isActive}
       aria-current={isActive ? "page" : undefined}
     >
-      <span className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-700 border border-gray-200",
-        isActive && "ring-2 ring-gray-900"
-      )}>
-        {item.initials || "·"}
+      <span
+        className={cn(
+          "flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-xs font-bold text-white",
+          isActive && "ring-electric shadow-glow"
+        )}
+        aria-hidden
+      >
+  <Icon name={labelToIcon(item.label)} className="h-4 w-4 text-[var(--color-accent1)]" />
       </span>
       <span className="flex flex-1 flex-col text-left">
-        <span className={cn("text-base font-semibold tracking-tight", isActive ? "text-gray-900" : "text-gray-700")}>
+        <span className={cn("text-base font-semibold tracking-tight", isActive ? "text-white" : "text-white/90")}>
           {item.label}
         </span>
       </span>
@@ -74,13 +78,13 @@ const CoalSidebar = memo(function CoalSidebar({ tenantName, userName, items }: C
   const content = (
     <nav className="flex h-full flex-col">
       <div className="space-y-2 px-6 pt-10">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-gray-500 drop-shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/80 drop-shadow-sm">
           {tenantName ?? "VulnTrack"}
         </p>
-        <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">Network Command Center</h1>
-        <p className="text-sm text-gray-600">Active perimeter monitoring</p>
+        <h1 className="text-2xl font-extrabold text-white tracking-tight">Network Command Center</h1>
+        <p className="text-sm text-white/80">Active perimeter monitoring</p>
       </div>
-  <div className="mt-8 flex-1 space-y-2 overflow-y-auto px-3 pb-12 min-h-0 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+  <div className="mt-8 flex-1 space-y-2 overflow-y-auto px-3 pb-12 min-h-0 scrollbar-thin scrollbar-thumb-white/30 scrollbar-track-white/10">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href || (pathname ?? "").startsWith(`${item.href}/`);
@@ -93,20 +97,41 @@ const CoalSidebar = memo(function CoalSidebar({ tenantName, userName, items }: C
           );
         })}
       </div>
-      <div className="border-t border-gray-200 px-6 py-6 text-sm text-gray-600 bg-gray-50">
-        <p className="text-xs font-bold uppercase tracking-[0.18em] text-gray-500">Operator</p>
-        <p className="text-base font-bold text-gray-900">{userName ?? "Analyst"}</p>
-        <p className="text-xs text-gray-500">Secure channel</p>
+      <div className="border-t border-white/10 px-6 py-6 text-sm text-white/80 bg-white/5">
+        <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">Operator</p>
+        <p className="text-base font-bold text-white">{userName ?? "Analyst"}</p>
+        <p className="text-xs text-white/70">Secure channel</p>
         {/* Espacio para selector de tema en el futuro */}
       </div>
     </nav>
   );
 
   return (
-    <aside className="flex h-full w-full flex-col border-r border-gray-200 bg-white text-gray-900 shadow-xl">
+    <aside
+      className="flex h-full w-full flex-col border-r text-white shadow-xl"
+      style={{
+        backgroundColor: "var(--color-bg)",
+        borderColor: "rgba(255,255,255,0.12)",
+      }}
+    >
       <div className="flex h-full w-full flex-col">{content}</div>
     </aside>
   );
 });
 
 export default CoalSidebar;
+
+function labelToIcon(label: string): import("./icons").IconName {
+  const key = label.toLowerCase();
+  if (key.includes("inventory") || key.includes("devices")) return "devices";
+  if (key.includes("radar")) return "radar";
+  if (key.includes("scan")) return "scans";
+  if (key.includes("automation")) return "automation";
+  if (key.includes("report")) return "reports";
+  if (key.includes("incident")) return "incidents";
+  if (key.includes("user")) return "users";
+  if (key.includes("setting")) return "settings";
+  if (key.includes("subscription")) return "subscription";
+  if (key.includes("dashboard") || key.includes("command")) return "dashboard";
+  return "dashboard";
+}

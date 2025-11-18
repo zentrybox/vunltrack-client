@@ -73,7 +73,7 @@ export default function SubscriptionPage() {
             <h3 className="text-2xl font-semibold text-gray-900">
               {loading ? "Loading…" : subscription?.plan ?? "—"}
             </h3>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-200 font-semibold">
               Plans unlock higher device and user capacity, priority alerting, and dedicated support.
             </p>
             <div className="flex flex-wrap gap-3">
@@ -120,7 +120,7 @@ export default function SubscriptionPage() {
       ) : null}
 
       {mutating ? (
-        <div className="flex items-center gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-3 text-sm text-slate-200">
           <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-400" aria-hidden />
           Calculating scenario…
         </div>

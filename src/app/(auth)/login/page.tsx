@@ -14,7 +14,7 @@ export default function LoginPage() {
         <h1 className="text-2xl font-semibold text-gray-900">Authenticate to continue</h1>
       </div>
       <LoginForm />
-      <p className="text-sm text-gray-600">
+  <p className="text-sm text-slate-200">
         Need an account? Contact your VulnTrack tenant administrator.
       </p>
     </div>
