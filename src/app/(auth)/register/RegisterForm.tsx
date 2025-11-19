@@ -21,23 +21,25 @@ export default function RegisterForm() {
       <form action={formAction} className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-semibold text-slate-200">
-              Your name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              placeholder="Ada Lovelace"
-              autoComplete="name"
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
+            <label htmlFor="name" className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                Your name
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                placeholder="Ada Lovelace"
+                autoComplete="name"
+                className="w-full rounded-md px-4 py-2 text-sm"
+                style={{ backgroundColor: 'var(--color-surface)', border: '1px solid rgba(30,144,255,0.12)', color: 'var(--color-text-primary)' }}
+              />
           </div>
           <div className="space-y-2">
             <label
               htmlFor="tenantName"
-              className="text-sm font-semibold text-slate-200"
+              className="text-sm font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
             >
               Tenant name
             </label>
@@ -47,12 +49,13 @@ export default function RegisterForm() {
               type="text"
               required
               placeholder="Sentinel Networks"
-              className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              className="w-full rounded-md px-4 py-2 text-sm"
+              style={{ backgroundColor: 'var(--color-surface)', border: '1px solid rgba(30,144,255,0.12)', color: 'var(--color-text-primary)' }}
             />
           </div>
         </div>
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-semibold text-slate-200">
+          <label htmlFor="email" className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Work email
           </label>
           <input
@@ -62,11 +65,12 @@ export default function RegisterForm() {
             required
             placeholder="you@sentinel.io"
             autoComplete="email"
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-md px-4 py-2 text-sm"
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid rgba(30,144,255,0.12)', color: 'var(--color-text-primary)' }}
           />
         </div>
         <div className="space-y-2">
-          <label htmlFor="password" className="text-sm font-semibold text-slate-200">
+          <label htmlFor="password" className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Password
           </label>
           <input
@@ -77,11 +81,12 @@ export default function RegisterForm() {
             minLength={10}
             placeholder="••••••••••"
             autoComplete="new-password"
-            className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-md px-4 py-2 text-sm"
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid rgba(30,144,255,0.12)', color: 'var(--color-text-primary)' }}
           />
         </div>
         {state.status === "error" ? (
-          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="rounded-md px-3 py-2 text-sm" style={{ border: '1px solid var(--color-alert)', backgroundColor: 'rgba(255,0,255,0.06)', color: 'var(--color-text-primary)' }}>
             {state.message ??
               "Registration failed. Double-check your details and try again."}
           </p>
@@ -89,9 +94,9 @@ export default function RegisterForm() {
         <CoalButton type="submit" className="w-full" isLoading={isPending} disabled={isPending}>
           Launch Command Center
         </CoalButton>
-  <p className="text-center text-sm text-slate-200">
+  <p className="text-center text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Already onboarded?{" "}
-          <Link href="/login" className="text-blue-600 hover:underline">
+          <Link href="/login" style={{ color: 'var(--color-accent1)' }} className="hover:underline">
             Return to login
           </Link>
         </p>

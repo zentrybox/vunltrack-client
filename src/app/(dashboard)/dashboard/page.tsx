@@ -11,7 +11,6 @@ import StatusBadge from "@/components/StatusBadge";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn, formatDateLabel } from "@/lib/utils";
 // import { computeAverageScanDuration, computeDetectionQuality, computeTimeSavings } from "@/lib/solution-kpis";
-import type { IncidentRecord } from "@/lib/types";
 
 const statCards = [
 	{
@@ -163,7 +162,7 @@ export default function DashboardPage() {
 							</p>
 							<p className="text-xs text-gray-500">
 								{metrics?.lastScanAt
-									? `Last scan ${formatDateLabel(metrics.lastScanAt)}`
+									? <span className="text-slate-200 font-medium">Last scan {formatDateLabel(metrics.lastScanAt)}</span>
 									: "Awaiting first scan"}
 							</p>
 						</div>
@@ -207,7 +206,7 @@ export default function DashboardPage() {
 									<div className="space-y-1">
 										<p className="text-sm font-semibold text-gray-900">{scan.id}</p>
 										<p className="text-xs text-gray-500">
-											Started {formatDateLabel(scan.startedAt)}
+											<span className="text-slate-200 font-medium">Started {formatDateLabel(scan.startedAt)}</span>
 										</p>
 									</div>
 								),
@@ -315,7 +314,7 @@ export default function DashboardPage() {
 								header: "Updated",
 								render: (incident) => (
 									<span className="text-xs text-gray-500">
-										{formatDateLabel(incident.updatedAt)}
+										<span className="text-slate-200 font-medium">{formatDateLabel(incident.updatedAt)}</span>
 									</span>
 								),
 							},

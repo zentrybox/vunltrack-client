@@ -100,10 +100,11 @@ export default function CoalTable<T>({
   return (
     <div
       className={cn(
-        "overflow-x-auto rounded-2xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-sm",
-        "scrollbar-thin scrollbar-thumb-[rgba(255,255,255,0.25)] scrollbar-track-[rgba(255,255,255,0.08)]",
+        "overflow-x-auto rounded-2xl border shadow-xl backdrop-blur-sm",
+        "scrollbar-thin scrollbar-thumb-[rgba(255,255,255,0.18)] scrollbar-track-[rgba(255,255,255,0.04)]",
         className,
       )}
+      style={{ backgroundColor: 'var(--color-surface)', borderColor: 'rgba(255,255,255,0.04)' }}
     >
   <table className="min-w-full border-collapse text-left text-sm text-white/90">
         {caption ? (
@@ -111,7 +112,7 @@ export default function CoalTable<T>({
             {caption}
           </caption>
         ) : null}
-  <thead className="sticky top-0 z-10 bg-white/5 text-[var(--color-accent1)] shadow-sm backdrop-blur-sm">
+  <thead className="sticky top-0 z-10 text-[var(--color-accent1)] shadow-sm backdrop-blur-sm" style={{ backgroundColor: 'transparent' }}>
           <tr>
             {columns.map((column) => (
               <th

@@ -8,12 +8,12 @@ interface StatusBadgeProps {
 }
 
 const toneStyles: Record<StatusBadgeProps["tone"], string> = {
-  // Restricted to 4-color palette (accent1, accent2, white, bg via alphas)
-  critical: "text-[var(--color-accent2)] border-[color:var(--color-accent2)]/30 bg-[color:var(--color-accent2)]/10",
-  warning: "text-[var(--color-accent2)] border-[color:var(--color-accent2)]/30 bg-transparent",
-  safe: "text-[var(--color-accent1)] border-[color:var(--color-accent1)]/30 bg-[color:var(--color-accent1)]/10",
-  info: "text-white border-white/20 bg-white/5",
-  neutral: "text-white/80 border-white/10 bg-white/5",
+  // Use dark neon palette variables
+  critical: "text-[var(--color-alert)] border-[color:var(--color-alert)]/30 bg-[color:var(--color-alert)]/10",
+  warning: "text-[var(--color-accent1)] border-[color:var(--color-accent1)]/30 bg-[color:var(--color-accent1)]/6",
+  safe: "text-[var(--color-success)] border-[color:var(--color-success)]/30 bg-[color:var(--color-success)]/8",
+  info: "text-[var(--color-hover)] border-[color:var(--color-hover)]/20 bg-[color:var(--color-hover)]/8",
+  neutral: "text-[var(--color-text-primary)] border-[color:rgba(255,255,255,0.06)]/10 bg-transparent",
 };
 
 export default function StatusBadge({ tone, children }: StatusBadgeProps) {

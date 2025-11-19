@@ -8,18 +8,24 @@ export default function RegisterPage() {
   return (
     <div className="space-y-6 text-center">
       <div>
-        <p className="text-sm uppercase tracking-[0.3em] text-blue-500">
+        <p className="text-sm uppercase tracking-[0.3em]" style={{ color: 'var(--color-accent1)' }}>
           VulnTrack
         </p>
-        <h1 className="text-2xl font-semibold text-gray-900">Bootstrap your VulnTrack tenant</h1>
-  <p className="mt-2 text-sm text-slate-200">
+        <h1 className="text-2xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>Bootstrap your VulnTrack tenant</h1>
+  <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           Provision your command center, then invite collaborators once inside.
         </p>
       </div>
-      <RegisterForm />
-  <p className="text-sm text-slate-200">
+        <RegisterForm />
+  <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
         Questions? Ping the VulnTrack support channel for expedited setup.
       </p>
+        <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          This will create a new tenant and a root operator account with the credentials you provide.
+        </p>
+        <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          After creating a tenant, you&apos;ll be redirected to the command center.
+        </p>
     </div>
   );
 }

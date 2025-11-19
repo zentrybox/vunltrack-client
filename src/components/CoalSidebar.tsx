@@ -33,8 +33,8 @@ const SidebarItem = memo(function SidebarItem({
         "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold transition-all duration-150",
         "hover:bg-white/10 hover:scale-[1.02]",
         isActive
-          ? "bg-white/10 text-white border-l-4 border-[var(--neon-magenta)] shadow ring-1 ring-[var(--neon-magenta)]/10"
-          : "text-white/85 border-l-4 border-transparent",
+          ? "bg-[rgba(30,144,255,0.06)] text-[var(--color-text-primary)] border-l-4 border-[var(--color-accent1)] ring-1 ring-[var(--color-accent1)]/10"
+          : "text-[var(--color-text-secondary)] border-l-4 border-transparent",
       )}
       data-active={isActive}
       aria-current={isActive ? "page" : undefined}
@@ -42,7 +42,7 @@ const SidebarItem = memo(function SidebarItem({
       <span
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-xs font-bold text-white",
-          isActive && "ring-electric shadow-glow"
+          isActive && "ring-electric"
         )}
         aria-hidden
       >
@@ -97,7 +97,7 @@ const CoalSidebar = memo(function CoalSidebar({ tenantName, userName, items }: C
           );
         })}
       </div>
-      <div className="border-t border-white/10 px-6 py-6 text-sm text-white/80 bg-white/5">
+      <div className="border-t px-6 py-6 text-sm" style={{ borderColor: 'rgba(255,255,255,0.04)', color: 'var(--color-text-secondary)', backgroundColor: 'transparent' }}>
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/70">Operator</p>
         <p className="text-base font-bold text-white">{userName ?? "Analyst"}</p>
         <p className="text-xs text-white/70">Secure channel</p>
@@ -108,10 +108,10 @@ const CoalSidebar = memo(function CoalSidebar({ tenantName, userName, items }: C
 
   return (
     <aside
-      className="flex h-full w-full flex-col border-r text-white shadow-xl"
+      className="flex h-full w-full flex-col border-r text-white shadow-xl surface"
       style={{
-        backgroundColor: "var(--color-bg)",
-        borderColor: "rgba(255,255,255,0.12)",
+        backgroundColor: "var(--color-surface)",
+        borderColor: "rgba(255,255,255,0.06)",
       }}
     >
       <div className="flex h-full w-full flex-col">{content}</div>

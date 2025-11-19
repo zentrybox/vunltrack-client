@@ -8,8 +8,8 @@ const config: Config = {
   theme: {
     extend: {
       boxShadow: {
-        glow: "0 0 0 2px rgba(0, 229, 255, 0.15), 0 8px 30px rgba(0, 229, 255, 0.08)",
-        "inner-glow": "inset 0 0 0 1px rgba(0,229,255,0.15)",
+        glow: "0 0 8px rgba(0, 191, 255, 0.14), 0 12px 40px rgba(0, 255, 255, 0.06)",
+        "inner-glow": "inset 0 0 0 1px rgba(0,255,255,0.12)",
       },
       animation: {
         "radar-sweep": "radar-sweep 5s linear infinite",
