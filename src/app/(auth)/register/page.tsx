@@ -24,7 +24,7 @@ export default function RegisterPage() {
           This will create a new tenant and a root operator account with the credentials you provide.
         </p>
         <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-          After creating a tenant, you'll be redirected to the command center.
+          After creating a tenant, you&apos;ll be redirected to the command center.
         </p>
     </div>
   );

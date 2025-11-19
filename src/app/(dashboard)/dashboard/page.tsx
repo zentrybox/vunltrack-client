@@ -11,7 +11,6 @@ import StatusBadge from "@/components/StatusBadge";
 import { useDashboard } from "@/hooks/useDashboard";
 import { cn, formatDateLabel } from "@/lib/utils";
 // import { computeAverageScanDuration, computeDetectionQuality, computeTimeSavings } from "@/lib/solution-kpis";
-import type { IncidentRecord } from "@/lib/types";
 
 const statCards = [
 	{

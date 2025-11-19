@@ -443,7 +443,7 @@ export default function DevicesPage() {
               </div>
             </form>
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-xs text-slate-200">For bulk device onboarding, use the "Bulk upload" tab or download the JSON template.</div>
+              <div className="text-xs text-slate-200">For bulk device onboarding, use the &quot;Bulk upload&quot; tab or download the JSON template.</div>
               <CoalButton variant="primary" size="sm" form="device-form" type="submit" isLoading={mutating}>Add device</CoalButton>
             </div>
             {formError ? (
