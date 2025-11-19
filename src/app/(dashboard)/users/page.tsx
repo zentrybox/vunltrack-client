@@ -79,7 +79,7 @@ export default function UsersPage() {
               render: (user) => (
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-                  <p className="text-xs text-gray-500">{user.email}</p>
+                  <p className="text-xs text-slate-200">{user.email}</p>
                 </div>
               ),
             },
@@ -94,7 +94,7 @@ export default function UsersPage() {
               key: "createdAt",
               header: "Joined",
               render: (user) => (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-200">
                   {formatDateLabel(user.createdAt)}
                 </span>
               ),

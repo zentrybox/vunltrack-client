@@ -53,6 +53,7 @@ export interface DeviceRecord {
   highFindings?: number;
   mediumFindings?: number;
   lowFindings?: number;
+  cpe?: string | null;
 }
 
 export interface DeviceDetail {

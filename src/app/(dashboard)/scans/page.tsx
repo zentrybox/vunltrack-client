@@ -425,10 +425,19 @@ export default function ScansPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-gray-900">Scan {scanDetail.scan.id}</p>
-                  <p className="text-xs text-gray-500">
-                    Started {formatDateLabel(scanDetail.scan.startedAt)} • {scanDetail.scan.status}
+                  <p className="text-base font-bold text-slate-100">{devices.find(d => d.id === scanDetail.results?.[0]?.deviceId)?.name || scanDetail.scan.id}</p>
+                  <p className="text-xs text-slate-300">
+                    <span className="text-slate-200 font-medium">Started {formatDateLabel(scanDetail.scan.startedAt)} • {scanDetail.scan.status}</span>
                   </p>
+                  {(() => {
+                    const device = devices.find(d => d.id === scanDetail.results?.[0]?.deviceId);
+                    if (device?.cpe) {
+                      return (
+                        <p className="text-xs font-mono text-slate-200 mt-1">CPE: {device.cpe}</p>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 <StatusBadge tone={statusTone[scanDetail.scan.status] ?? "neutral"}>
                   {scanDetail.scan.status}
@@ -465,7 +474,7 @@ export default function ScansPage() {
                 <div className="space-y-1">
                   <p className="font-semibold text-gray-900">Devices</p>
                   <p>Total: {scanDetail.scan.totalDevices}</p>
-                  <p>Completed: {scanDetail.scan.completedDevices}</p>
+                  <p className="text-slate-200 font-medium">Completed: {scanDetail.scan.completedDevices}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="font-semibold text-gray-900">Outcomes</p>
@@ -492,7 +501,7 @@ export default function ScansPage() {
                         <div className="space-y-1">
                           <p className="text-sm font-semibold text-gray-900">{deviceName}</p>
                           <p className="text-xs text-gray-500">
-                            Started {formatDateLabel(result.startedAt)}
+                            <span className="text-slate-200 font-medium">Started {formatDateLabel(result.startedAt)}</span>
                           </p>
                         </div>
                       );
@@ -523,7 +532,7 @@ export default function ScansPage() {
                     header: "Completed",
                     render: (result) => (
                       <span className="text-xs text-gray-500">
-                        {result.finishedAt ? formatDateLabel(result.finishedAt) : "—"}
+                        <span className="text-slate-200 font-medium">{result.finishedAt ? formatDateLabel(result.finishedAt) : "—"}</span>
                       </span>
                     ),
                   },
@@ -588,24 +597,28 @@ export default function ScansPage() {
               ) : null}
               {Object.entries(deviceAnalyses).filter(([, a]) => a).length > 0 && (
                 <div className="space-y-3">
-                  {Object.entries(deviceAnalyses)
-                    .filter(([, a]) => a)
-                    .map(([deviceId, analysis]) => {
-                      const a = analysis as VulnerabilityAnalysis;
+                  {scanDetail && scanDetail.results && Object.keys(deviceAnalyses).length > 0 && (
+                    (() => {
+                      // Find the device in the current scan whose analysis exists
+                      const analyzedDeviceId = scanDetail.results.find(r => deviceAnalyses[r.deviceId])?.deviceId;
+                      if (!analyzedDeviceId) return null;
+                      const a = deviceAnalyses[analyzedDeviceId] as VulnerabilityAnalysis;
+                      if (!a) return null;
                       return (
-                        <CoalCard key={deviceId} title={`Analysis ${deviceId}`} subtitle={a.riskLevel}>
-                          <p className="text-sm text-gray-700">{a.summary}</p>
+                        <CoalCard key={analyzedDeviceId} title={`Analysis ${analyzedDeviceId}`} subtitle={a.riskLevel}>
+                          <p className="text-sm text-slate-200 font-semibold">{a.summary}</p>
                           <div className="mt-3 space-y-2">
-                            <p className="text-xs font-semibold text-gray-900">Recommendations</p>
-                            <ul className="list-disc pl-5 text-sm text-gray-700">
+                            <p className="text-xs font-semibold text-slate-100">Recommendations</p>
+                            <ul className="list-disc pl-5 text-sm text-slate-300">
                               {a.recommendations?.map((r: string, i: number) => (
-                                <li key={i}>{r}</li>
+                                <li key={i} className="text-slate-200 font-medium">{r}</li>
                               ))}
                             </ul>
                           </div>
                         </CoalCard>
                       );
-                    })}
+                    })()
+                  )}
                 </div>
               )}
             </div>
@@ -624,15 +637,37 @@ export default function ScansPage() {
 
       {exportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-gray-900">Export selected device results</h3>
-            <p className="mt-1 text-sm text-slate-200">Choose the format you prefer for your export.</p>
+          <div className="w-full max-w-md rounded-xl border border-blue-500/30 bg-slate-900 p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-slate-100">Export selected device results</h3>
+            <p className="mt-1 text-sm text-slate-300">Choose the format you prefer for your export.</p>
             <div className="mt-5 grid grid-cols-2 gap-3">
-              <CoalButton variant="secondary" onClick={handleExportCSV} disabled={exporting}>Export CSV</CoalButton>
-              <CoalButton variant="primary" onClick={handleExportJSON} disabled={exporting}>Export JSON</CoalButton>
+              <CoalButton
+                variant="secondary"
+                onClick={handleExportCSV}
+                disabled={exporting}
+                className="bg-slate-800 text-slate-200 border-blue-400/40 disabled:text-slate-500 disabled:bg-slate-800/60 disabled:border-blue-400/20"
+              >
+                Export CSV
+              </CoalButton>
+              <CoalButton
+                variant="primary"
+                onClick={handleExportJSON}
+                disabled={exporting}
+                className="bg-gradient-to-r from-blue-600 to-blue-400 text-white border-blue-400/60 disabled:from-blue-900 disabled:to-blue-700 disabled:text-slate-400"
+              >
+                Export JSON
+              </CoalButton>
             </div>
             <div className="mt-4 text-right">
-              <CoalButton variant="ghost" size="sm" onClick={closeExportModal} disabled={exporting}>Cancel</CoalButton>
+              <CoalButton
+                variant="ghost"
+                size="sm"
+                onClick={closeExportModal}
+                disabled={exporting}
+                className="text-slate-300 border-blue-400/40 disabled:text-slate-500 disabled:border-blue-400/20"
+              >
+                Cancel
+              </CoalButton>
             </div>
           </div>
         </div>

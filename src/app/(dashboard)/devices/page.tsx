@@ -210,7 +210,7 @@ export default function DevicesPage() {
                       {device.name ?? `${device.vendor} ${device.product}`}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {device.vendor} {device.product} · v{device.version}
+                      <span className="text-slate-300 font-medium">{device.vendor} {device.product} · v{device.version}</span>
                     </p>
                   </div>
                 ),
@@ -311,9 +311,9 @@ export default function DevicesPage() {
           <div className="space-y-6">
             <div>
               <p className="text-5xl font-semibold text-red-600">{totalCritical}</p>
-              <p className="text-sm text-gray-500">Open critical findings</p>
+              <p className="text-sm font-semibold text-slate-200">Open critical findings</p>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-300">
               VulnTrack continuously ingests CVE intelligence and cross-references with your device firmware. Resolve
               exposures to unlock downgrade scenarios.
             </p>
@@ -398,8 +398,8 @@ export default function DevicesPage() {
       <CoalCard title="Register device" subtitle="Manual onboarding for out-of-band assets">
         {/* Tab switcher */}
         <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1 text-sm">
-          <button type="button" onClick={() => setTab('single')} className={`rounded-md px-3 py-1.5 font-medium ${tab==='single' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>Un dispositivo</button>
-          <button type="button" onClick={() => setTab('bulk')} className={`ml-1 rounded-md px-3 py-1.5 font-medium ${tab==='bulk' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>Varios (JSON)</button>
+          <button type="button" onClick={() => setTab('single')} className={`rounded-md px-3 py-1.5 font-medium ${tab==='single' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>A device</button>
+          <button type="button" onClick={() => setTab('bulk')} className={`ml-1 rounded-md px-3 py-1.5 font-medium ${tab==='bulk' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>Multiple (JSON)</button>
         </div>
 
         {tab === 'single' ? (
@@ -439,7 +439,7 @@ export default function DevicesPage() {
               </div>
             </form>
             <div className="mt-4 flex items-center justify-between">
-              <div className="text-xs text-slate-200">¿Tienes muchos dispositivos? Importa un JSON con tu inventario usando &quot;Bulk upload&quot; o descarga el formato con &quot;Download JSON template&quot;.</div>
+              <div className="text-xs text-slate-200">For bulk device onboarding, use the "Bulk upload" tab or download the JSON template.</div>
               <CoalButton variant="primary" size="sm" form="device-form" type="submit" isLoading={mutating}>Add device</CoalButton>
             </div>
             {formError ? (
@@ -448,7 +448,7 @@ export default function DevicesPage() {
           </>
         ) : (
           <>
-            <p className="text-sm text-slate-300">Importa un archivo .json con <code>devices</code> o pega el JSON. Todos los campos son requeridos: vendor, product, version, name, ip, serial, state (ACTIVE|INACTIVE|RETIRED).</p>
+            <p className="text-sm text-slate-300">Import a .json file with <code>devices</code> or paste the JSON. All fields are required: vendor, product, version, name, ip, serial, state (ACTIVE|INACTIVE|RETIRED).</p>
             {/* Pretty uploader + drag & drop */}
             <div
               className={`flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${dragOver ? 'border-blue-500/60 bg-blue-500/10' : 'border-white/10 bg-slate-900/40'}`}
@@ -479,8 +479,8 @@ export default function DevicesPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-50">Carga tu inventario (.json)</p>
-                  <p className="text-xs text-slate-300">Arrastra y suelta o selecciona un archivo. También puedes pegar el JSON abajo.</p>
+                  <p className="text-sm font-semibold text-slate-50">Upload your inventory (.json)</p>
+                  <p className="text-xs text-slate-300">Drag and drop or select a file. You can also paste the JSON below.</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -500,15 +500,15 @@ export default function DevicesPage() {
                     setIsImporting(false);
                   }
                 }} />
-                <CoalButton variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Seleccionar archivo</CoalButton>
+                <CoalButton variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Select file</CoalButton>
                 <CoalButton variant="ghost" size="sm" onClick={() => window.open('/api/devices/template', '_blank')}>Download JSON template</CoalButton>
-                <CoalButton variant="ghost" size="sm" onClick={() => validateBulkText(bulkText)}>Validar JSON</CoalButton>
-                <CoalButton variant="ghost" size="sm" onClick={encryptCurrentText}>Cifrar (local)</CoalButton>
+                <CoalButton variant="ghost" size="sm" onClick={() => validateBulkText(bulkText)}>Validate JSON</CoalButton>
+                <CoalButton variant="ghost" size="sm" onClick={encryptCurrentText}>Encrypt (local)</CoalButton>
               </div>
             </div>
             {encryptedBlobUrl ? (
               <div className="mt-2 flex items-center justify-between rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs">
-                <span className="text-emerald-300">Archivo cifrado localmente (AES‑GCM, sesión actual)</span>
+                <span className="text-emerald-300">Locally encrypted file (AES-GCM, current session)</span>
                 <div className="flex items-center gap-2">
                   <a className="inline-flex items-center gap-1 rounded bg-emerald-500/20 px-2 py-1 text-emerald-200 hover:bg-emerald-500/30" href={encryptedBlobUrl} download={`devices.encrypted.json`}>Descargar encriptado</a>
                   <button className="text-emerald-300/80 hover:text-emerald-200" onClick={() => { if (encryptedBlobUrl) URL.revokeObjectURL(encryptedBlobUrl); setEncryptedBlobUrl(null); }}>Limpiar</button>
@@ -533,19 +533,19 @@ export default function DevicesPage() {
             {validation ? (
               <div className="rounded-md border border-white/10 bg-slate-900/40 p-3 text-sm">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="font-medium text-slate-100">Validación: {validation.total} ítems · {validation.errors > 0 ? `${validation.errors} con errores` : 'sin errores'}</p>
-                  {validation.errors > 0 ? <span className="text-xs text-red-300">Corrige los errores antes de importar</span> : <span className="text-xs text-emerald-300">Listo para importar</span>}
+                  <p className="font-medium text-slate-100">Validation: {validation.total} items · {validation.errors > 0 ? `${validation.errors} with errors` : 'no errors'}</p>
+                  {validation.errors > 0 ? <span className="text-xs text-red-300">Correct the errors before importing</span> : <span className="text-xs text-emerald-300">Ready to import</span>}
                 </div>
                 {validation.errors > 0 ? (
                   <ul className="mb-3 list-disc space-y-1 pl-5">
                     {validation.items.slice(0, 10).map((it) => (
                       <li key={it.index} className="text-slate-200">
-                        Ítem #{it.index + 1}: {it.missing.length > 0 ? <>faltan <strong>{it.missing.join(', ')}</strong></> : null}
+                        Item #{it.index + 1}: {it.missing.length > 0 ? <>missing <strong>{it.missing.join(', ')}</strong></> : null}
                         {it.missing.length > 0 && it.invalid.length > 0 ? ' · ' : ''}
-                        {it.invalid.length > 0 ? <>inválidos <strong>{it.invalid.join(', ')}</strong></> : null}
+                        {it.invalid.length > 0 ? <>invalid <strong>{it.invalid.join(', ')}</strong></> : null}
                       </li>
                     ))}
-                    {validation.errors > 10 ? <li className="text-slate-400">… y {validation.errors - 10} más</li> : null}
+                    {validation.errors > 10 ? <li className="text-slate-400">… and {validation.errors - 10} more</li> : null}
                   </ul>
                 ) : null}
 
@@ -592,7 +592,7 @@ export default function DevicesPage() {
                                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
                                     <path fillRule="evenodd" d="M10 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm-.75-5.25a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Zm.75-6.5a.75.75 0 0 0-.75.75v3a.75.75 0 1 0 1.5 0v-3a.75.75 0 0 0-.75-.75Z" clipRule="evenodd" />
                                   </svg>
-                                  {issue?.missing.length ? `Faltan ${issue.missing.join(', ')}` : ''}{issue?.missing.length && issue?.invalid.length ? ' · ' : ''}{issue?.invalid.length ? `Inválidos ${issue.invalid.join(', ')}` : ''}
+                                  {issue?.missing.length ? `Missing ${issue.missing.join(', ')}` : ''}{issue?.missing.length && issue?.invalid.length ? ' · ' : ''}{issue?.invalid.length ? `Invalid ${issue.invalid.join(', ')}` : ''}
                                 </span>
                               )}</td>
                             </tr>
@@ -606,11 +606,11 @@ export default function DevicesPage() {
             ) : null}
             {bulkSummary ? (
               <div className="rounded-md border border-white/10 bg-slate-900/40 p-3 text-sm text-slate-200">
-                <p><strong>Resultado:</strong> {bulkSummary.created} creados, {bulkSummary.failed} fallidos de {bulkSummary.total}.</p>
+                <p><strong>Result:</strong> {bulkSummary.created} created, {bulkSummary.failed} failed out of {bulkSummary.total}.</p>
                 {bulkSummary.failed > 0 ? (
                   <ul className="mt-2 list-disc pl-5">
                     {bulkSummary.results.filter(r => r.status !== 'created').slice(0, 10).map(r => (
-                      <li key={r.index}>Ítem #{r.index + 1}: {r.error || 'Error'}</li>
+                      <li key={r.index}>Item #{r.index + 1}: {r.error || 'Error'}</li>
                     ))}
                     {bulkSummary.failed > 10 ? <li>... y {bulkSummary.failed - 10} más</li> : null}
                   </ul>
@@ -631,18 +631,18 @@ export default function DevicesPage() {
                     const res = await validateBulkText(bulkText);
                     // Si hay errores, detenemos
                     if (!res || res.summary.errors > 0) {
-                      setBulkError('Corrige los errores antes de importar.');
+                      setBulkError('Correct the errors before importing.');
                       return;
                     }
                     const summary = await bulkAddDevices(res.sanitized);
                     setBulkSummary(summary);
                   } catch (err) {
-                    setBulkError(err instanceof Error ? err.message : 'No se pudo procesar el JSON');
+                    setBulkError(err instanceof Error ? err.message : 'Failed to process JSON');
                   } finally {
                     setIsImporting(false);
                   }
                 }}
-              >Importar</CoalButton>
+              >Import</CoalButton>
             </div>
           </>
         )}

@@ -225,12 +225,12 @@ export default function SettingsPage() {
           </div>
           <div className="space-y-4 rounded-xl border border-gray-200 bg-gray-50 p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">
-              Plan capabilities
+              <span className="text-xs font-semibold uppercase tracking-[0.24em] text-black">Plan capabilities</span>
             </p>
             <ul className="space-y-3 text-sm text-slate-200">
-              <li>• API rate limits scale with plan tier.</li>
-              <li>• Dedicated Slack channel available on ENTERPRISE.</li>
-              <li>• Incident SLA drops to 30 minutes on STANDARD and above.</li>
+              <li className="text-black">• API rate limits scale with plan tier.</li>
+              <li className="text-black">• Dedicated Slack channel available on ENTERPRISE.</li>
+              <li className="text-black">• Incident SLA drops to 30 minutes on STANDARD and above.</li>
             </ul>
           </div>
         </div>
@@ -263,14 +263,14 @@ export default function SettingsPage() {
                 key: "action",
                 header: "Action",
                 render: (item) => (
-                  <span className="text-xs text-gray-500">{item.action}</span>
+                  <span className="text-xs text-slate-200 font-medium">{item.action}</span>
                 ),
               },
               {
                 key: "timestamp",
                 header: "Timestamp",
                 render: (item) => (
-                  <span className="text-xs text-gray-500">{formatDateLabel(item.timestamp)}</span>
+                  <span className="text-xs text-slate-200 font-medium">{formatDateLabel(item.timestamp)}</span>
                 ),
               },
             ]}

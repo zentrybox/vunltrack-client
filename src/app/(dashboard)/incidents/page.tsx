@@ -66,7 +66,7 @@ export default function IncidentsPage() {
               render: (incident) => (
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-gray-900">{incident.scanId}</p>
-                  <p className="text-xs text-gray-500">Device {incident.deviceId}</p>
+                  <p className="text-xs text-slate-300 font-medium">Device {incident.deviceId}</p>
                 </div>
               ),
             },
@@ -97,7 +97,7 @@ export default function IncidentsPage() {
               key: "updatedAt",
               header: "Updated",
               render: (incident) => (
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-slate-200 font-medium">
                   {formatDateLabel(incident.updatedAt)}
                 </span>
               ),
