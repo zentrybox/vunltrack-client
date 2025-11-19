@@ -339,13 +339,13 @@ export default function ScansPage() {
           <form className="space-y-5" onSubmit={handleStartScan}>
             <div className="max-h-72 overflow-y-auto rounded-md border border-gray-200 bg-gray-50 p-4">
               {devicesLoading ? (
-                <p className="text-sm text-gray-500">Loading devices…</p>
+                <p className="text-sm">Loading devices…</p>
               ) : selectableDevices.length === 0 ? (
-                <p className="text-sm text-gray-500">
+                <p className="text-sm">
                   No devices available. Add devices from the inventory first.
                 </p>
               ) : (
-                <ul className="space-y-3 text-sm text-gray-700">
+                <ul className="space-y-3 text-sm">
                   {selectableDevices.map((device) => {
                     const label = device.name
                       ? `${device.name} · ${device.vendor} ${device.product}`
@@ -360,7 +360,7 @@ export default function ScansPage() {
                           className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
                         <label htmlFor={`device-${device.id}`} className="flex-1 cursor-pointer space-y-1">
-                          <p className="font-semibold text-gray-900">{label}</p>
+                          <p className="font-semibold">{label}</p>
                           <p className="text-xs text-gray-500">
                             Last scan {device.lastScanAt ? formatDateLabel(device.lastScanAt) : "—"}
                           </p>
@@ -472,12 +472,12 @@ export default function ScansPage() {
               })()}
               <div className="grid grid-cols-2 gap-4 rounded-md border border-gray-200 bg-gray-50 p-4 text-xs text-gray-600">
                 <div className="space-y-1">
-                  <p className="font-semibold text-gray-900">Devices</p>
+                  <p className="font-semibold ">Devices</p>
                   <p>Total: {scanDetail.scan.totalDevices}</p>
                   <p className="text-slate-200 font-medium">Completed: {scanDetail.scan.completedDevices}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="font-semibold text-gray-900">Outcomes</p>
+                  <p className="font-semibold ">Outcomes</p>
                   <p>Successful: {scanDetail.scan.successful}</p>
                   <p>With issues: {scanDetail.scan.withIssues}</p>
                 </div>
@@ -499,7 +499,7 @@ export default function ScansPage() {
                       const deviceName = device?.name || device?.product || result.deviceId;
                       return (
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold text-gray-900">{deviceName}</p>
+                          <p className="text-sm font-semibold ">{deviceName}</p>
                           <p className="text-xs text-gray-500">
                             <span className="text-slate-200 font-medium">Started {formatDateLabel(result.startedAt)}</span>
                           </p>
@@ -691,7 +691,7 @@ export default function ScansPage() {
               header: "Scan",
               render: (scan) => (
                 <div className="space-y-1">
-                  <p className="text-sm font-semibold text-gray-900">{scan.id}</p>
+                  <p className="text-sm font-semibold ">{scan.id}</p>
                   <p className="text-xs text-gray-500">
                     Started {formatDateLabel(scan.startedAt)}
                   </p>

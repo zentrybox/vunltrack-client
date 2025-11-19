@@ -210,7 +210,7 @@ export default function DevicesPage() {
                 header: "Device",
                 render: (device) => (
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-gray-900">
+                    <p className="text-sm font-semibold">
                       {device.name ?? `${device.vendor} ${device.product}`}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -401,9 +401,9 @@ export default function DevicesPage() {
 
       <CoalCard title="Register device" subtitle="Manual onboarding for out-of-band assets">
         {/* Tab switcher */}
-        <div className="mb-4 inline-flex rounded-lg border border-gray-200 bg-gray-50 p-1 text-sm">
-          <button type="button" onClick={() => setTab('single')} className={`rounded-md px-3 py-1.5 font-medium ${tab==='single' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>A device</button>
-          <button type="button" onClick={() => setTab('bulk')} className={`ml-1 rounded-md px-3 py-1.5 font-medium ${tab==='bulk' ? 'bg-white text-gray-900 shadow border border-gray-200' : 'text-gray-600 hover:text-gray-800'}`}>Multiple (JSON)</button>
+        <div className="mb-4 inline-flex rounded-lg border border-white/10 surface p-1 text-sm">
+          <button type="button" onClick={() => setTab('single')} className={`rounded-md px-3 py-1.5 font-medium ${tab==='single' ? 'surface text-white/90 shadow border border-white/10' : 'text-slate-300 hover:text-white'}`}>A device</button>
+          <button type="button" onClick={() => setTab('bulk')} className={`ml-1 rounded-md px-3 py-1.5 font-medium ${tab==='bulk' ? 'surface text-white/90 shadow border border-white/10' : 'text-slate-300 hover:text-white'}`}>Multiple (JSON)</button>
         </div>
 
         {tab === 'single' ? (
@@ -411,31 +411,31 @@ export default function DevicesPage() {
             <form id="device-form" className="grid gap-4 md:grid-cols-3" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="vendor">Vendor</label>
-                <input id="vendor" name="vendor" value={form.vendor} onChange={(e) => setForm((p) => ({ ...p, vendor: e.target.value }))} placeholder="Cisco" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="vendor" name="vendor" value={form.vendor} onChange={(e) => setForm((p) => ({ ...p, vendor: e.target.value }))} placeholder="Cisco" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="product">Product</label>
-                <input id="product" name="product" value={form.product} onChange={(e) => setForm((p) => ({ ...p, product: e.target.value }))} placeholder="Nexus 9000" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="product" name="product" value={form.product} onChange={(e) => setForm((p) => ({ ...p, product: e.target.value }))} placeholder="Nexus 9000" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="version">Version</label>
-                <input id="version" name="version" value={form.version} onChange={(e) => setForm((p) => ({ ...p, version: e.target.value }))} placeholder="9.3(5)" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="version" name="version" value={form.version} onChange={(e) => setForm((p) => ({ ...p, version: e.target.value }))} placeholder="9.3(5)" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="name">Friendly name</label>
-                <input id="name" name="name" value={form.name ?? ''} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Core switch" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="name" name="name" value={form.name ?? ''} onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))} placeholder="Core switch" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="ip">IP address</label>
-                <input id="ip" name="ip" value={form.ip ?? ''} onChange={(e) => setForm((p) => ({ ...p, ip: e.target.value }))} placeholder="10.10.21.14" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="ip" name="ip" value={form.ip ?? ''} onChange={(e) => setForm((p) => ({ ...p, ip: e.target.value }))} placeholder="10.10.21.14" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="serial">Serial number</label>
-                <input id="serial" name="serial" value={form.serial ?? ''} onChange={(e) => setForm((p) => ({ ...p, serial: e.target.value }))} placeholder="SN123456789" required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" />
+                <input id="serial" name="serial" value={form.serial ?? ''} onChange={(e) => setForm((p) => ({ ...p, serial: e.target.value }))} placeholder="SN123456789" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="state">State</label>
-                <select id="state" name="state" value={form.state ?? 'ACTIVE'} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value as DeviceState }))} required className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                <select id="state" name="state" value={form.state ?? 'ACTIVE'} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value as DeviceState }))} required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none">
                   <option value="ACTIVE">Active</option>
                   <option value="INACTIVE">Inactive</option>
                   <option value="RETIRED">Retired</option>

@@ -42,13 +42,13 @@ const TopBar = memo(function TopBar({ userName, onSignOut }: TopBarProps) {
   }, []);
 
   return (
-  <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/10 bg-white/5 px-6 shadow-sm backdrop-blur">
+  <header className="sticky top-0 z-30 flex h-16 items-center justify-between px-6 shadow-sm backdrop-blur" style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid rgba(255,255,255,0.04)', color: 'var(--color-text-primary)' }}>
       <div className="flex items-center space-x-4">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.32em]" style={{ color: 'var(--color-text-secondary)' }}>
             VulnTrack Command
           </p>
-          <h2 className="text-sm font-semibold text-white/90">
+          <h2 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             Active perimeter monitoring
           </h2>
         </div>
@@ -60,23 +60,23 @@ const TopBar = memo(function TopBar({ userName, onSignOut }: TopBarProps) {
             type="button"
             onClick={toggleMenu}
             className={cn(
-              "flex items-center gap-3 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/90 transition hover:bg-white/10",
-              menuOpen && "bg-white/10",
+              "flex items-center gap-3 rounded-md border px-4 py-2 text-sm transition",
+              menuOpen ? "" : "",
             )}
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-base font-semibold text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border text-base font-semibold" style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.06)', color: 'var(--color-text-primary)' }}>
               {initials}
             </span>
             <span className="hidden text-left sm:block">
-              <span className="block text-sm font-semibold text-white/90">
+              <span className="block text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
                 {userName ?? "Analyst"}
               </span>
-              <span className="block text-xs text-white/70">Security Lead</span>
+              <span className="block text-xs" style={{ color: 'var(--color-text-secondary)' }}>Security Lead</span>
             </span>
-            <Icon name="chevron-down" className="h-4 w-4 text-white/70" aria-hidden />
+            <Icon name="chevron-down" className="h-4 w-4" aria-hidden style={{ color: 'var(--color-text-secondary)' }} />
           </button>
           {menuOpen ? (
-            <div className="absolute right-0 mt-2 w-48 rounded-md border border-white/10 bg-white/5 p-2 text-sm text-white/90 shadow-lg backdrop-blur">
+            <div className="absolute right-0 mt-2 w-48 rounded-md p-2 text-sm shadow-lg backdrop-blur" style={{ backgroundColor: 'var(--color-surface)', border: '1px solid rgba(255,255,255,0.04)', color: 'var(--color-text-primary)' }}>
               <button
                 type="button"
                 onClick={() => {

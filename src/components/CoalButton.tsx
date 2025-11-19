@@ -7,15 +7,15 @@ import { cn } from "@/lib/utils";
 
 const variantStyles = {
   primary:
-    "relative bg-gradient-to-r from-[var(--color-accent2)] to-[var(--color-accent1)] text-white shadow-[0_8px_24px_color-mix(in_srgb,var(--color-accent2)_22%,transparent)] hover:scale-[1.03] focus-visible:ring-2 ring-accent",
+    "relative bg-[var(--color-accent1)] text-white shadow-[0_6px_18px_color-mix(in_srgb,var(--color-accent1)_10%,transparent)] hover:scale-[1.02] focus-visible:ring-2 ring-hover",
   cta:
-    "relative bg-gradient-to-r from-[var(--color-accent2)] to-[var(--color-accent1)] text-white shadow-[0_10px_36px_color-mix(in_srgb,var(--color-accent2)_28%,transparent)] hover:shadow-[0_12px_42px_color-mix(in_srgb,var(--color-accent1)_28%,transparent)] hover:scale-[1.04] ring-accent",
+    "relative bg-[var(--color-accent1)] text-white shadow-[0_8px_24px_color-mix(in_srgb,var(--color-accent1)_10%,transparent)] hover:scale-[1.03] ring-hover",
   secondary:
-    "relative border border-white/15 bg-white/5 text-white shadow-md hover:bg-white/10 hover:scale-[1.02] focus-visible:ring-2 ring-electric",
+    "relative border border-[var(--color-accent1)] bg-transparent text-[var(--color-text-primary)] shadow-md hover:bg-[rgba(30,144,255,0.04)] hover:scale-[1.02] focus-visible:ring-2 ring-electric",
   ghost:
-    "relative border border-transparent bg-transparent text-white/85 hover:bg-white/10 focus-visible:ring-2 ring-electric",
+    "relative border border-transparent bg-transparent text-[var(--color-text-primary)]/90 hover:bg-[rgba(255,255,255,0.02)] focus-visible:ring-2 ring-electric",
   danger:
-    "relative bg-[var(--color-accent2)] text-white shadow-[0_8px_24px_color-mix(in_srgb,var(--color-accent2)_22%,transparent)] hover:scale-[1.03] focus-visible:ring-2 ring-accent",
+    "relative bg-[var(--color-alert)] text-[var(--color-bg)] shadow-[0_8px_24px_color-mix(in_srgb,var(--color-alert)_22%,transparent)] hover:scale-[1.03] focus-visible:ring-2 ring-hover",
 } as const;
 
 const sizeStyles = {
@@ -75,7 +75,7 @@ const CoalButton = forwardRef<HTMLButtonElement, CoalButtonProps>(
       >
         {/* Shine overlay */}
         <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-          <span className="absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-12deg] bg-white/30 opacity-0 transition-opacity duration-200 group-hover:opacity-40" style={{
+          <span className="absolute inset-y-0 -left-1/3 w-1/3 skew-x-[-12deg] bg-[rgba(0,255,255,0.06)] opacity-0 transition-opacity duration-200 group-hover:opacity-30" style={{
             animation: "shine 1.2s linear 1",
           }} />
         </span>

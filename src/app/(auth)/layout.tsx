@@ -10,8 +10,8 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: 'var(--color-bg)' }}>
+      <div className="w-full max-w-md rounded-xl p-8 shadow-sm" style={{ backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
         {children}
       </div>
     </div>
