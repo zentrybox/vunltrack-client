@@ -532,13 +532,13 @@ export default function IncidentDetailPage() {
                 </div>
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   {deviceResult.cves.map((cve) => (
-                    <div key={cve} className="rounded-md border border-red-200 bg-red-50 p-4">
-                      <p className="font-semibold text-red-900 text-lg">{cve}</p>
-                      <p className="text-sm text-red-700 mt-1">Critical vulnerability detected</p>
+                    <div key={cve} className="rounded-md border border-blue-500 bg-black p-4 shadow-lg">
+                      <p className="font-semibold text-blue-400 text-lg">{cve}</p>
+                      <p className="text-sm text-blue-300 mt-1">Critical vulnerability detected</p>
                       <CoalButton
                         variant="secondary"
                         size="sm"
-                        className="mt-3"
+                        className="mt-3 border-blue-400 text-blue-400 hover:bg-blue-700 hover:text-white"
                         onClick={() => window.open(`https://nvd.nist.gov/vuln/detail/${cve}`, '_blank')}
                       >
                         View NVD Details
