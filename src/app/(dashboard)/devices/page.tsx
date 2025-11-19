@@ -52,12 +52,16 @@ export default function DevicesPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!form.vendor || !form.product || !form.version || !form.name || !form.ip || !form.serial || !form.state) {
+    const trimmedForm = {
+      ...form,
+      ip: typeof form.ip === 'string' ? form.ip.trim() : '',
+    };
+    if (!trimmedForm.vendor || !trimmedForm.product || !trimmedForm.version || !trimmedForm.name || !trimmedForm.ip || !trimmedForm.serial || !trimmedForm.state) {
       setFormError("All fields are required (vendor, product, version, name, ip, serial, state)");
       return;
     }
     setFormError(null);
-    await addDevice(form);
+    await addDevice(trimmedForm);
     setForm(initialForm);
   };
 
