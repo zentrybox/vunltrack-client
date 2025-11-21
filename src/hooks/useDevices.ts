@@ -6,6 +6,7 @@ import type {
   CreateDevicePayload,
   DeviceDetail,
   DeviceRecord,
+  DeviceState,
 } from "@/lib/types";
 
 interface DevicesResponse {
@@ -49,10 +50,15 @@ export function useDevices() {
       setMutating(true);
       setError(null);
       try {
+        const normalized: CreateDevicePayload = {
+          ...payload,
+          state: payload.state ? (payload.state as string).toLowerCase() as DeviceState : undefined,
+        };
+        console.log('[devices] addDevice outgoing state =', normalized.state);
         const response = await fetch("/api/devices", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(normalized),
         });
 
         if (!response.ok) {
@@ -75,10 +81,15 @@ export function useDevices() {
       setMutating(true);
       setError(null);
       try {
+        const normalizedItems = items.map((it) => ({
+          ...it,
+          state: it.state ? (it.state as string).toLowerCase() as DeviceState : undefined,
+        }));
+        console.log('[devices] bulkAddDevices outgoing states =', normalizedItems.map(d => d.state));
         const response = await fetch("/api/devices/bulk", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ devices: items }),
+          body: JSON.stringify({ devices: normalizedItems }),
         });
 
         if (!response.ok) {
@@ -109,10 +120,15 @@ export function useDevices() {
       setMutating(true);
       setError(null);
       try {
+        const normalized: Partial<CreateDevicePayload> = {
+          ...payload,
+          state: payload.state ? (payload.state as string).toLowerCase() as DeviceState : undefined,
+        };
+        console.log('[devices] updateDevice outgoing state =', normalized.state);
         const response = await fetch(`/api/devices/${deviceId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(normalized),
         });
 
         if (!response.ok) {

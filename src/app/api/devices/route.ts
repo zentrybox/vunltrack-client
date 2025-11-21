@@ -40,9 +40,9 @@ export async function POST(request: Request) {
 
   function normalizeState(value: unknown): DeviceState | undefined {
     if (typeof value !== "string") return undefined;
-    const upper = value.toUpperCase();
-    return ["ACTIVE", "INACTIVE", "RETIRED"].includes(upper as DeviceState)
-      ? (upper as DeviceState)
+    const lower = value.toLowerCase();
+    return ["active", "inactive", "retired"].includes(lower as DeviceState)
+      ? (lower as DeviceState)
       : undefined;
   }
 
@@ -86,6 +86,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log('[api/devices] POST incoming normalized state =', payload.state);
     const device = await createDevice(session.tenantId, session.token, {
       vendor: payload.vendor,
       product: payload.product,

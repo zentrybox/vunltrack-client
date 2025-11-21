@@ -47,7 +47,11 @@ export default function ScansPage() {
   const [exportTarget, setExportTarget] = useState<ScanResultRecord | null>(null);
   const [criticalOnly, setCriticalOnly] = useState(false);
   const [zeroOnly, setZeroOnly] = useState(false);
-  const [dismissedAlertForScan, setDismissedAlertForScan] = useState<string | null>(null);
+  const [scanDetailCache, setScanDetailCache] = useState<Record<string, ScanDetailResponse>>({});
+  // Critical vulnerabilities popup
+  const [criticalPopupOpen, setCriticalPopupOpen] = useState(false);
+  const [criticalPopupScanId, setCriticalPopupScanId] = useState<string | null>(null);
+  const [criticalDevicesCount, setCriticalDevicesCount] = useState(0);
   // Progress UI when launching a scan
   const [scanProgressActive, setScanProgressActive] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
@@ -113,7 +117,6 @@ export default function ScansPage() {
     setDetailLoading(true);
   setCriticalOnly(false);
   setZeroOnly(false);
-    setDismissedAlertForScan(null);
     try {
       const detail = await getScanDetail(scanId);
       setScanDetail(detail);
@@ -199,6 +202,22 @@ export default function ScansPage() {
             clearInterval(pollIntervalRef.current);
             pollIntervalRef.current = null;
           }
+          
+          // Check for critical vulnerabilities and show popup
+          if (detail.scan.status === 'completed' && detail.results) {
+            const criticalDevices = detail.results.filter((r) => {
+              const device = devices.find(d => d.id === r.deviceId);
+              const highCritFromDevice = (device?.criticalFindings ?? 0) > 0 || (device?.highFindings ?? 0) > 0;
+              const highCritFromCount = (r.cveCount ?? (r.cves?.length ?? 0)) >= 5;
+              return highCritFromDevice || highCritFromCount;
+            });
+            
+            if (criticalDevices.length > 0) {
+              setCriticalDevicesCount(criticalDevices.length);
+              setCriticalPopupScanId(launchedScanId);
+              setCriticalPopupOpen(true);
+            }
+          }
         }
       } catch {
         // ignore polling errors
@@ -210,7 +229,24 @@ export default function ScansPage() {
         pollIntervalRef.current = null;
       }
     };
-  }, [scanProgressActive, launchedScanId, getScanDetail]);
+  }, [scanProgressActive, launchedScanId, getScanDetail, devices]);
+
+  // Auto-load scan details when filters are applied
+  useEffect(() => {
+    if ((criticalOnly || zeroOnly) && scans.length > 0) {
+      // Load scan details for filtering
+      scans.forEach(async (scan) => {
+        if (!scanDetailCache[scan.id]) {
+          try {
+            const detail = await getScanDetail(scan.id);
+            setScanDetailCache(prev => ({ ...prev, [scan.id]: detail }));
+          } catch {
+            // ignore errors
+          }
+        }
+      });
+    }
+  }, [criticalOnly, zeroOnly, scans, getScanDetail]);
 
   // After reaching 100%, hide the progress after a short delay
   useEffect(() => {
@@ -222,7 +258,32 @@ export default function ScansPage() {
     return () => clearTimeout(t);
   }, [scanProgress]);
 
-  // helpers to export
+  // Filter scans based on actual CVE data  
+  const getFilteredScans = () => {
+    if (!criticalOnly && !zeroOnly) return scans;
+    
+    return scans.filter(scan => {
+      const cachedDetail = scanDetailCache[scan.id];
+      if (!cachedDetail?.results) {
+        // If we don't have scan details yet, include it in the list
+        // so user can inspect it and get the data
+        return true;
+      }
+      
+      const results = cachedDetail.results;
+      const criticalCount = results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) >= 5).length;
+      const zeroCount = results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) === 0).length;
+      
+      if (criticalOnly) {
+        return criticalCount > 0;
+      }
+      if (zeroOnly) {
+        return zeroCount > 0;
+      }
+      
+      return true;
+    });
+  };
   const triggerDownload = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -392,104 +453,50 @@ export default function ScansPage() {
     title="Selected scan"
     subtitle="Drill into device-level findings"
     className="min-w-0"
-    action={scanDetail && (scanDetail.scan.successful ?? 0) >= 2 ? (
-      <div className="flex items-center gap-2">
-        <CoalButton
-          variant={criticalOnly ? 'secondary' : 'ghost'}
-          size="sm"
-          onClick={() => {
-            setCriticalOnly((v) => !v);
-            setZeroOnly(false);
-          }}
-        >
-          {criticalOnly ? 'Show all': 'Critical devices'}
-        </CoalButton>
-        {scanDetail ? (
-          <CoalButton
-            variant={zeroOnly ? 'secondary' : 'ghost'}
-            size="sm"
-            onClick={() => {
-              setZeroOnly((v) => !v);
-              setCriticalOnly(false);
-            }}
-          >
-            {zeroOnly ? 'Show all' : 'No vulnerabilities (0 CVEs)'}
-          </CoalButton>
-        ) : null}
-      </div>
-    ) : null}
   >
           {detailLoading ? (
-            <p className="text-sm text-gray-500">Loading scan detail…</p>
+            <p className="text-sm text-blue-300 animate-pulse">Loading scan detail…</p>
           ) : scanDetail ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-base font-bold text-slate-100">{devices.find(d => d.id === scanDetail.results?.[0]?.deviceId)?.name || scanDetail.scan.id}</p>
-                  <p className="text-xs text-slate-300">
-                    <span className="text-slate-200 font-medium">Started {formatDateLabel(scanDetail.scan.startedAt)} • {scanDetail.scan.status}</span>
-                  </p>
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-white">{devices.find(d => d.id === scanDetail.results?.[0]?.deviceId)?.name || scanDetail.scan.id}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-slate-300">
+                      Started {formatDateLabel(scanDetail.scan.startedAt)}
+                    </p>
+                    <span className="text-slate-500">•</span>
+                    <StatusBadge tone={statusTone[scanDetail.scan.status] ?? "neutral"}>
+                      {scanDetail.scan.status}
+                    </StatusBadge>
+                  </div>
                   {(() => {
                     const device = devices.find(d => d.id === scanDetail.results?.[0]?.deviceId);
                     if (device?.cpe) {
                       return (
-                        <p className="text-xs font-mono text-slate-200 mt-1">CPE: {device.cpe}</p>
+                        <p className="text-xs font-mono text-blue-300 bg-slate-800/50 px-2 py-1 rounded mt-2 inline-block">
+                          CPE: {device.cpe}
+                        </p>
                       );
                     }
                     return null;
                   })()}
                 </div>
-                <StatusBadge tone={statusTone[scanDetail.scan.status] ?? "neutral"}>
-                  {scanDetail.scan.status}
-                </StatusBadge>
               </div>
-              {/* Highlight alert when high/critical detected after completion */}
-              {(() => {
-                if (!scanDetail || scanDetail.scan.status !== 'completed') return null;
-                if (dismissedAlertForScan === scanDetail.scan.id) return null;
-                const results = scanDetail.results || [];
-                // Determine high/critical by device aggregated findings or by threshold (>=10 CVEs)
-                const isHighOrCritical = (res: ScanResultRecord) => {
-                  const device = devices.find(d => d.id === res.deviceId);
-                  const highCritFromDevice = (device?.criticalFindings ?? 0) > 0 || (device?.highFindings ?? 0) > 0;
-                  const highCritFromCount = (res.cveCount ?? (res.cves?.length ?? 0)) >= 10; // threshold rule
-                  return highCritFromDevice || highCritFromCount;
-                };
-                const affected = results.filter(isHighOrCritical);
-                if (affected.length === 0) return null; // only low/medium -> no critical alert
-                return (
-                  <div className="flex items-start justify-between gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
-                    <div className="space-y-1">
-                      <p className="text-sm font-semibold text-red-800">High/Critical vulnerabilities detected</p>
-                      <p className="text-xs text-red-700">{affected.length} device{affected.length === 1 ? '' : 's'} impacted in this scan.</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <CoalButton variant="secondary" size="sm" onClick={() => { setCriticalOnly(true); setZeroOnly(false); }}>View critical</CoalButton>
-                      <CoalButton variant="ghost" size="sm" onClick={() => setDismissedAlertForScan(scanDetail.scan.id)}>Dismiss</CoalButton>
-                    </div>
-                  </div>
-                );
-              })()}
-              <div className="grid grid-cols-2 gap-4 rounded-md border border-gray-200 bg-gray-50 p-4 text-xs text-gray-600">
-                <div className="space-y-1">
-                  <p className="font-semibold ">Devices</p>
-                  <p>Total: {scanDetail.scan.totalDevices}</p>
-                  <p className="text-slate-200 font-medium">Completed: {scanDetail.scan.completedDevices}</p>
+              <div className="grid grid-cols-2 gap-4 rounded-md border border-blue-500/30 bg-slate-800/50 p-4 text-sm">
+                <div className="space-y-2">
+                  <p className="font-semibold text-blue-300">Devices</p>
+                  <p className="text-slate-200">Total: <span className="font-bold text-white">{scanDetail.scan.totalDevices}</span></p>
+                  <p className="text-slate-200">Completed: <span className="font-bold text-green-400">{scanDetail.scan.completedDevices}</span></p>
                 </div>
-                <div className="space-y-1">
-                  <p className="font-semibold ">Outcomes</p>
-                  <p>Successful: {scanDetail.scan.successful}</p>
-                  <p>With issues: {scanDetail.scan.withIssues}</p>
+                <div className="space-y-2">
+                  <p className="font-semibold text-blue-300">Outcomes</p>
+                  <p className="text-slate-200">Successful: <span className="font-bold text-green-400">{scanDetail.scan.successful}</span></p>
+                  <p className="text-slate-200">With issues: <span className="font-bold text-orange-400">{scanDetail.scan.withIssues}</span></p>
                 </div>
               </div>
               <CoalTable
-                data={(
-                  criticalOnly
-                    ? (scanDetail.results || []).filter((r) => (r.cveCount ?? (r.cves?.length ?? 0)) >= 10)
-                    : zeroOnly
-                      ? (scanDetail.results || []).filter((r) => (r.cveCount ?? (r.cves?.length ?? 0)) === 0)
-                      : scanDetail.results
-                )}
+                data={scanDetail?.results || []}
                 columns={[
                   {
                     key: "deviceId",
@@ -499,9 +506,9 @@ export default function ScansPage() {
                       const deviceName = device?.name || device?.product || result.deviceId;
                       return (
                         <div className="space-y-1">
-                          <p className="text-sm font-semibold ">{deviceName}</p>
-                          <p className="text-xs text-gray-500">
-                            <span className="text-slate-200 font-medium">Started {formatDateLabel(result.startedAt)}</span>
+                          <p className="text-sm font-semibold text-slate-100">{deviceName}</p>
+                          <p className="text-xs">
+                            <span className="text-slate-300">Started {formatDateLabel(result.startedAt)}</span>
                           </p>
                         </div>
                       );
@@ -521,7 +528,7 @@ export default function ScansPage() {
                     header: "CVEs",
                     align: "center",
                     render: (result) => (
-                      <span className={cn("text-sm font-semibold", result.cveCount > 0 ? "text-red-600" : "text-emerald-600")}
+                      <span className={cn("text-sm font-semibold", result.cveCount > 0 ? "text-red-400" : "text-emerald-400")}
                       >
                         {result.cveCount}
                       </span>
@@ -531,8 +538,8 @@ export default function ScansPage() {
                     key: "finishedAt",
                     header: "Completed",
                     render: (result) => (
-                      <span className="text-xs text-gray-500">
-                        <span className="text-slate-200 font-medium">{result.finishedAt ? formatDateLabel(result.finishedAt) : "—"}</span>
+                      <span className="text-xs text-slate-300">
+                        {result.finishedAt ? formatDateLabel(result.finishedAt) : "—"}
                       </span>
                     ),
                   },
@@ -582,18 +589,18 @@ export default function ScansPage() {
                   },
                 ]}
                 emptyState={criticalOnly
-                  ? "There are no critical devices (≥10 CVEs) in this scan."
+                  ? "No critical devices found (≥5 CVEs) in this scan."
                   : zeroOnly
-                    ? "There are no 0-CVE devices in this scan."
-                    : "No device results yet."}
+                    ? "No devices with zero vulnerabilities found."
+                    : "No device results available yet."}
               />
               {analysisError ? (
-                <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <p className="mt-3 rounded-md border border-red-500/40 bg-red-950/30 px-3 py-2 text-sm text-red-300">
                   {analysisError}
                 </p>
               ) : null}
               {analysisLoading ? (
-                <p className="mt-3 text-sm text-gray-500">Running analysis…</p>
+                <p className="mt-3 text-sm text-blue-300 animate-pulse">Running analysis…</p>
               ) : null}
               {Object.entries(deviceAnalyses).filter(([, a]) => a).length > 0 && (
                 <div className="space-y-3">
@@ -605,15 +612,22 @@ export default function ScansPage() {
                       const a = deviceAnalyses[analyzedDeviceId] as VulnerabilityAnalysis;
                       if (!a) return null;
                       return (
-                        <CoalCard key={analyzedDeviceId} title={`Analysis ${analyzedDeviceId}`} subtitle={a.riskLevel}>
-                          <p className="text-sm text-slate-200 font-semibold">{a.summary}</p>
-                          <div className="mt-3 space-y-2">
-                            <p className="text-xs font-semibold text-slate-100">Recommendations</p>
-                            <ul className="list-disc pl-5 text-sm text-slate-300">
-                              {a.recommendations?.map((r: string, i: number) => (
-                                <li key={i} className="text-slate-200 font-medium">{r}</li>
-                              ))}
-                            </ul>
+                        <CoalCard key={analyzedDeviceId} title={`Analysis for Device`} subtitle={a.riskLevel}>
+                          <div className="space-y-4">
+                            <div className="rounded-lg bg-slate-800/50 p-3">
+                              <p className="text-sm text-slate-100 leading-relaxed">{a.summary}</p>
+                            </div>
+                            <div className="space-y-3">
+                              <p className="text-sm font-semibold text-blue-300">Security Recommendations</p>
+                              <ul className="space-y-2">
+                                {a.recommendations?.map((r: string, i: number) => (
+                                  <li key={i} className="flex items-start gap-2">
+                                    <span className="text-blue-400 mt-1">•</span>
+                                    <span className="text-sm text-slate-200">{r}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
                           </div>
                         </CoalCard>
                       );
@@ -623,11 +637,11 @@ export default function ScansPage() {
               )}
             </div>
           ) : detailError ? (
-            <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p className="rounded-md border border-red-500/40 bg-red-950/30 px-3 py-2 text-sm text-red-300">
               {detailError}
             </p>
           ) : (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-slate-400">
               Select a scan from the history to view device-level results.
             </p>
           )}
@@ -676,27 +690,103 @@ export default function ScansPage() {
       <CoalCard
         title="Scan history"
         subtitle="Chronological record of all tenant scans"
+        action={
+          <div className="flex items-center gap-2">
+            <CoalButton
+              variant={criticalOnly ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                setCriticalOnly((v) => !v);
+                setZeroOnly(false);
+              }}
+              className={criticalOnly ? 'border-red-400 text-red-300' : ''}
+            >
+              {criticalOnly ? 'Show all': 'Scans with critical devices'}
+              <span className="ml-1 bg-red-500/20 text-red-300 px-1.5 py-0.5 rounded text-xs">
+                {scans.filter(scan => {
+                  const cached = scanDetailCache[scan.id];
+                  if (!cached?.results) return false;
+                  return cached.results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) >= 5).length > 0;
+                }).length}
+              </span>
+            </CoalButton>
+            <CoalButton
+              variant={zeroOnly ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => {
+                setZeroOnly((v) => !v);
+                setCriticalOnly(false);
+              }}
+              className={zeroOnly ? 'border-green-400 text-green-300' : ''}
+            >
+              {zeroOnly ? 'Show all' : 'Scans with clean devices'}
+              <span className="ml-1 bg-green-500/20 text-green-300 px-1.5 py-0.5 rounded text-xs">
+                {scans.filter(scan => {
+                  const cached = scanDetailCache[scan.id];
+                  if (!cached?.results) return false;
+                  return cached.results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) === 0).length > 0;
+                }).length}
+              </span>
+            </CoalButton>
+          </div>
+        }
       >
         {error ? (
-          <p className="mb-4 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <p className="mb-4 rounded-md border border-red-500/40 bg-red-950/30 px-3 py-2 text-sm text-red-300">
             {error}
           </p>
         ) : null}
         <CoalTable
-          data={scans}
+          data={getFilteredScans()}
           isLoading={loading}
           columns={[
             {
               key: "id",
               header: "Scan",
-              render: (scan) => (
-                <div className="space-y-1">
-                  <p className="text-sm font-semibold ">{scan.id}</p>
-                  <p className="text-xs text-gray-500">
-                    Started {formatDateLabel(scan.startedAt)}
-                  </p>
-                </div>
-              ),
+              render: (scan) => {
+                // Get real CVE data from cache if available
+                const cachedDetail = scanDetailCache[scan.id];
+                let criticalCount = 0;
+                let zeroCount = 0;
+                let totalCVEs = 0;
+                
+                if (cachedDetail?.results) {
+                  const results = cachedDetail.results;
+                  criticalCount = results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) >= 5).length;
+                  zeroCount = results.filter(r => (r.cveCount ?? (r.cves?.length ?? 0)) === 0).length;
+                  totalCVEs = results.reduce((sum, r) => sum + (r.cveCount ?? (r.cves?.length ?? 0)), 0);
+                }
+                
+                return (
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold text-slate-100">{scan.id}</p>
+                      {totalCVEs > 0 && (
+                        <span className="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded">
+                          {totalCVEs} CVEs
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      Started {formatDateLabel(scan.startedAt)}
+                    </p>
+                    {cachedDetail && (
+                      <div className="flex items-center gap-2 text-xs">
+                        {criticalCount > 0 && (
+                          <span className="bg-red-500/20 text-red-300 px-2 py-0.5 rounded">
+                            {criticalCount} critical
+                          </span>
+                        )}
+                        {zeroCount > 0 && (
+                          <span className="bg-green-500/20 text-green-300 px-2 py-0.5 rounded">
+                            {zeroCount} clean
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              },
             },
             {
               key: "status",
@@ -710,8 +800,10 @@ export default function ScansPage() {
               header: "Success",
               align: "center",
               render: (scan) => (
-                <span className="text-xs font-semibold text-gray-800">
-                  {scan.successful}/{scan.totalDevices}
+                <span className="text-sm font-semibold">
+                  <span className="text-green-400">{scan.successful}</span>
+                  <span className="text-slate-400">/</span>
+                  <span className="text-slate-300">{scan.totalDevices}</span>
                 </span>
               ),
             },
@@ -736,9 +828,65 @@ export default function ScansPage() {
               ),
             },
           ]}
-          emptyState="No scans have been recorded. Launch your first scan above."
+          emptyState={
+            criticalOnly 
+              ? "No scans found with critical devices (≥5 CVEs)."
+              : zeroOnly
+                ? "No scans found with clean devices (0 CVEs)."
+                : "No scans have been recorded. Launch your first scan above."
+          }
         />
       </CoalCard>
+
+      {/* Critical Vulnerabilities Popup */}
+      {criticalPopupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-xl border border-red-500/40 bg-slate-900 p-6 shadow-2xl animate-in fade-in-0 zoom-in-95 duration-300">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+                <span className="text-3xl">🔥</span>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-bold text-red-300">Critical Vulnerabilities Detected!</h3>
+                <p className="text-sm text-slate-300">
+                  Found <span className="font-bold text-red-400">{criticalDevicesCount} device{criticalDevicesCount === 1 ? '' : 's'}</span> with 
+                  5 or more CVEs in your latest scan.
+                </p>
+              </div>
+              <div className="flex flex-col gap-3 pt-4">
+                <CoalButton
+                  variant="primary"
+                  onClick={() => {
+                    setCriticalPopupOpen(false);
+                    if (criticalPopupScanId) {
+                      handleSelectScan(criticalPopupScanId);
+                      setCriticalOnly(true);
+                      setZeroOnly(false);
+                    }
+                  }}
+                  className="bg-gradient-to-r from-red-600 to-red-500 text-white border-red-400/60"
+                >
+                  View Critical Devices
+                </CoalButton>
+                <CoalButton
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setCriticalPopupOpen(false);
+                    if (criticalPopupScanId) {
+                      handleSelectScan(criticalPopupScanId);
+                    }
+                  }}
+                  className="text-slate-400 border-slate-600"
+                >
+                  View All Results
+                </CoalButton>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

@@ -41,6 +41,7 @@ import {
   StartScanResponse,
   UpdateIncidentPayload,
   VulnerabilityQueueItem,
+  DeviceState,
 } from "./types";
 
 export class ApiError extends Error {
@@ -77,6 +78,21 @@ async function request<T>(
   let response: Response;
 
   try {
+    // Debug: outgoing request details (truncate body if large)
+    let debugBody: unknown = undefined;
+    if (init.body && typeof init.body === 'string') {
+      try {
+        const parsed = JSON.parse(init.body);
+        if (parsed && typeof parsed === 'object') {
+          debugBody = parsed;
+        } else {
+          debugBody = init.body.slice(0, 200);
+        }
+      } catch {
+        debugBody = (init.body as string).slice(0, 200);
+      }
+    }
+    console.log('[lib/api] request', { path, method: init.method, body: debugBody && typeof debugBody === 'object' ? debugBody : debugBody });
     response = await fetch(url, {
       ...init,
       headers: requestHeaders,
@@ -203,10 +219,15 @@ export async function createDevice(
   token: string,
   payload: CreateDevicePayload,
 ): Promise<DeviceRecord> {
+  // Normalize state to lowercase if provided
+  const body: CreateDevicePayload = {
+    ...payload,
+    state: payload.state ? (payload.state as string).toLowerCase() as DeviceState : undefined,
+  };
   return request<DeviceRecord>(`/api/tenants/${tenantId}/devices`, {
     method: "POST",
     token,
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }
 
@@ -238,7 +259,7 @@ export async function updateDevice(
   // Normalize known fields to match backend expectations
   const bodyPayload = { ...payload } as Record<string, unknown>;
   if (typeof bodyPayload.state === "string") {
-    bodyPayload.state = (bodyPayload.state as string).toUpperCase();
+    bodyPayload.state = (bodyPayload.state as string).toLowerCase();
   }
 
   const device = await request<DeviceRecord>(

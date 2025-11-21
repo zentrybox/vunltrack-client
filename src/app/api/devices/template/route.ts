@@ -11,7 +11,7 @@ export async function GET() {
         name: "Core switch",
         ip: "10.10.21.14",
         serial: "SN123456789",
-        state: "ACTIVE",
+        state: "active",
       },
       {
         vendor: "Fortinet",
@@ -20,11 +20,11 @@ export async function GET() {
         name: "Edge firewall",
         ip: "10.10.1.1",
         serial: "FGT90E3G16000000",
-        state: "ACTIVE",
+        state: "active",
       },
     ],
     notes:
-      "Todos los campos son requeridos: vendor, product, version, name, ip, serial, state (ACTIVE|INACTIVE|RETIRED).",
+      "Todos los campos son requeridos: vendor, product, version, name, ip, serial, state (active|inactive|retired).",
   };
 
   const json = JSON.stringify(template, null, 2);

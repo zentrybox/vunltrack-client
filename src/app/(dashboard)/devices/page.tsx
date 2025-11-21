@@ -18,7 +18,7 @@ const initialForm: CreateDevicePayload = {
   name: "",
   ip: "",
   serial: "",
-  state: "ACTIVE",
+  state: undefined,
 };
 
 export default function DevicesPage() {
@@ -32,7 +32,7 @@ export default function DevicesPage() {
   const [isImporting, setIsImporting] = useState(false);
   const [bulkText, setBulkText] = useState<string>(`{
   "devices": [
-    { "vendor": "Cisco", "product": "Nexus 9000", "version": "9.3(5)", "name": "Core switch", "ip": "10.10.21.14", "serial": "SN123456789", "state": "ACTIVE" }
+    { "vendor": "Fortinet", "product": "FortiGate 60F", "version": "7.0.0", "name": "Firewall", "ip": "192.168.1.1", "serial": "FG60F123456", "state": "active" }
   ]
 }`);
   const [bulkError, setBulkError] = useState<string | null>(null);
@@ -52,16 +52,31 @@ export default function DevicesPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const trimmedForm = {
+    const trimmed = {
       ...form,
       ip: typeof form.ip === 'string' ? form.ip.trim() : '',
     };
-    if (!trimmedForm.vendor || !trimmedForm.product || !trimmedForm.version || !trimmedForm.name || !trimmedForm.ip || !trimmedForm.serial || !trimmedForm.state) {
+
+    // normalize and validate state to match DeviceState type
+    const normalizedState = normalizeStateValue(trimmed.state);
+
+    if (!trimmed.vendor || !trimmed.product || !trimmed.version || !trimmed.name || !trimmed.ip || !trimmed.serial || !normalizedState) {
       setFormError("All fields are required (vendor, product, version, name, ip, serial, state)");
       return;
     }
     setFormError(null);
-    await addDevice(trimmedForm);
+
+    const payload: CreateDevicePayload = {
+      vendor: trimmed.vendor,
+      product: trimmed.product,
+      version: trimmed.version,
+      name: trimmed.name,
+      ip: trimmed.ip,
+      serial: trimmed.serial,
+      state: normalizedState?.toLowerCase() as DeviceState,  // Force lowercase
+    };
+
+    await addDevice(payload);
     setForm(initialForm);
   };
 
@@ -73,8 +88,11 @@ export default function DevicesPage() {
 
   function normalizeStateValue(value: unknown): DeviceState | undefined {
     if (typeof value !== 'string') return undefined;
-    const up = value.toUpperCase();
-    return (['ACTIVE','INACTIVE','RETIRED'] as const).includes(up as DeviceState) ? (up as DeviceState) : undefined;
+    const up = value.toLowerCase();
+    if (up === 'active' || up === 'inactive' || up === 'retired') {
+      return up as DeviceState;
+    }
+    return undefined;
   }
 
   async function validateBulkText(jsonText: string): Promise<
@@ -222,13 +240,20 @@ export default function DevicesPage() {
               {
                 key: "state",
                 header: "State",
-                render: (device) => (
-                  <StatusBadge
-                    tone={device.state === "ACTIVE" ? "safe" : device.state === "INACTIVE" ? "neutral" : "warning"}
-                  >
-                    {device.state ?? "ACTIVE"}
-                  </StatusBadge>
-                ),
+                render: (device) => {
+                  const rawState = String(device.state ?? "active");
+                  const stateNormalized = rawState.toLowerCase();
+                  const tone =
+                    stateNormalized === "active" ? "safe" :
+                    stateNormalized === "inactive" ? "neutral" :
+                    "warning";
+                  const label = stateNormalized.charAt(0).toUpperCase() + stateNormalized.slice(1);
+                  return (
+                    <StatusBadge tone={tone}>
+                      {label}
+                    </StatusBadge>
+                  );
+                },
               },
               {
                 key: "criticalFindings",
@@ -282,7 +307,7 @@ export default function DevicesPage() {
                           ip: device.ip ?? undefined,
                           name: device.name ?? undefined,
                           serial: device.serial ?? undefined,
-                          state: device.state ?? undefined,
+                          state: normalizeStateValue(device.state) ?? 'active',
                         });
                       }}
                     >
@@ -335,7 +360,13 @@ export default function DevicesPage() {
               e.preventDefault();
               if (!editingId || !editForm) return;
               try {
-                await updateDevice(editingId, editForm as Partial<CreateDevicePayload>);
+                // Normalize state to lowercase
+                const normalizedEditForm: Partial<CreateDevicePayload> = {
+                  ...editForm,
+                  state: normalizeStateValue(editForm.state) ?? 'active',
+                };
+
+                await updateDevice(editingId, normalizedEditForm);
                 setEditingId(null);
                 setEditForm(null);
               } catch {
@@ -379,6 +410,15 @@ export default function DevicesPage() {
               placeholder="Serial"
               className="rounded-md border px-3 py-2"
             />
+            <select
+              value={editForm.state ?? 'active'}
+              onChange={(e) => setEditForm({ ...(editForm ?? {}), state: e.target.value as DeviceState })}
+              className="rounded-md border px-3 py-2"
+            >
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+              <option value="retired">Retired</option>
+            </select>
             <div className="md:col-span-3 flex gap-2">
               <CoalButton type="submit" variant="primary" size="sm" isLoading={mutating}>
                 Save
@@ -411,7 +451,7 @@ export default function DevicesPage() {
             <form id="device-form" className="grid gap-4 md:grid-cols-3" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="vendor">Vendor</label>
-                <input id="vendor" name="vendor" value={form.vendor} onChange={(e) => setForm((p) => ({ ...p, vendor: e.target.value }))} placeholder="Cisco" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
+                <input id="vendor" name="vendor" value={form.vendor} onChange={(e) => setForm((p) => ({ ...p, vendor: e.target.value }))} placeholder="e.g., Fortinet, Cisco, Palo Alto" required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="product">Product</label>
@@ -435,10 +475,11 @@ export default function DevicesPage() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-200" htmlFor="state">State</label>
-                <select id="state" name="state" value={form.state ?? 'ACTIVE'} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value as DeviceState }))} required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none">
-                  <option value="ACTIVE">Active</option>
-                  <option value="INACTIVE">Inactive</option>
-                  <option value="RETIRED">Retired</option>
+                <select id="state" name="state" value={form.state ?? ''} onChange={(e) => setForm((p) => ({ ...p, state: e.target.value as DeviceState }))} required className="w-full rounded-md border border-white/10 px-4 py-2 text-sm focus:outline-none">
+                  <option value="" disabled>Select device state</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="retired">Retired</option>
                 </select>
               </div>
             </form>
@@ -452,7 +493,7 @@ export default function DevicesPage() {
           </>
         ) : (
           <>
-            <p className="text-sm text-slate-300">Import a .json file with <code>devices</code> or paste the JSON. All fields are required: vendor, product, version, name, ip, serial, state (ACTIVE|INACTIVE|RETIRED).</p>
+            <p className="text-sm text-slate-300">Import a .json file with <code>devices</code> or paste the JSON. All fields are required: vendor, product, version, name, ip, serial, state (active|inactive|retired).</p>
             {/* Pretty uploader + drag & drop */}
             <div
               className={`flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors ${dragOver ? 'border-blue-500/60 bg-blue-500/10' : 'border-white/10 bg-slate-900/40'}`}
@@ -531,7 +572,7 @@ export default function DevicesPage() {
                 </div>
               </div>
             ) : null}
-            <textarea value={bulkText} onChange={(e) => { setBulkText(e.target.value); setBulkError(null); setEncryptedBlobUrl(null); }} className="min-h-[220px] w-full rounded-md border border-white/10 bg-slate-900/40 p-3 font-mono text-xs text-slate-100 placeholder:text-slate-400" placeholder='{"devices": [{"vendor":"Cisco","product":"Nexus 9000","version":"9.3(5)","name":"Core switch","ip":"10.10.21.14","serial":"SN123456789","state":"ACTIVE"}]}' />
+            <textarea value={bulkText} onChange={(e) => { setBulkText(e.target.value); setBulkError(null); setEncryptedBlobUrl(null); }} className="min-h-[220px] w-full rounded-md border border-white/10 bg-slate-900/40 p-3 font-mono text-xs text-slate-100 placeholder:text-slate-400" placeholder='{"devices": [{"vendor":"Fortinet","product":"FortiGate 60F","version":"7.0.0","name":"Firewall","ip":"192.168.1.1","serial":"FG60F123456","state":"active"}]}' />
             {bulkError ? (<p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">{bulkError}</p>) : null}
             {/* Validation summary */}
             {validation ? (
