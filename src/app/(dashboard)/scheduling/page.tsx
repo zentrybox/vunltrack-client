@@ -252,7 +252,7 @@ export default function SchedulingPage() {
                             {device.name ?? `${device.vendor} ${device.product}`}
                           </p>
                           <p className="text-xs text-gray-500">
-                            State: {device.state ?? "ACTIVE"}
+                            State: {device.state ?? "active"}
                           </p>
                         </label>
                       </li>

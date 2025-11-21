@@ -31,7 +31,8 @@ export interface RegisterRootPayload {
   password?: string;
 }
 
-export type DeviceState = "ACTIVE" | "INACTIVE" | "RETIRED";
+// Harmonized to lowercase to match backend storage & UI expectations
+export type DeviceState = "active" | "inactive" | "retired";
 
 export type DeviceScanStatus = "OK" | "ISSUES" | "FAILED";
 

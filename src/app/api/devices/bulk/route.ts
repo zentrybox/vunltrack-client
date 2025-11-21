@@ -8,9 +8,9 @@ const unauthorized = NextResponse.json({ message: "Unauthorized" }, { status: 40
 
 function normalizeState(value: unknown): DeviceState | undefined {
   if (typeof value !== "string") return undefined;
-  const upper = value.toUpperCase();
-  return ["ACTIVE", "INACTIVE", "RETIRED"].includes(upper as DeviceState)
-    ? (upper as DeviceState)
+  const lower = value.toLowerCase();
+  return ["active", "inactive", "retired"].includes(lower as DeviceState)
+    ? (lower as DeviceState)
     : undefined;
 }
 
@@ -95,6 +95,8 @@ export async function POST(request: Request) {
     }
 
     try {
+      // Debug log: outgoing state payload
+      console.log('[api/devices/bulk] creating device index', i, 'state=', payload.state);
       const created = await createDevice(session.tenantId, session.token, payload);
       results.push({ index: i, status: "created", id: created.id });
     } catch (error) {

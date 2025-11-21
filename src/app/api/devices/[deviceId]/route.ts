@@ -74,7 +74,12 @@ export async function PATCH(
   }
 
   try {
-    const device = await updateDevice(session.tenantId, deviceId, session.token, body as UpdateDevicePayload);
+    const normalized: UpdateDevicePayload = { ...body };
+    if (typeof normalized.state === 'string') {
+      normalized.state = normalized.state.toLowerCase();
+    }
+    console.log('[api/devices/:id] PATCH outgoing state =', normalized.state);
+    const device = await updateDevice(session.tenantId, deviceId, session.token, normalized as UpdateDevicePayload);
     return NextResponse.json({ device });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;
@@ -108,7 +113,12 @@ export async function PUT(
   }
 
   try {
-    const device = await updateDevice(session.tenantId, deviceId, session.token, body as UpdateDevicePayload);
+    const normalized: UpdateDevicePayload = { ...body };
+    if (typeof normalized.state === 'string') {
+      normalized.state = normalized.state.toLowerCase();
+    }
+    console.log('[api/devices/:id] PUT outgoing state =', normalized.state);
+    const device = await updateDevice(session.tenantId, deviceId, session.token, normalized as UpdateDevicePayload);
     return NextResponse.json({ device });
   } catch (error) {
     const status = error instanceof ApiError ? error.status : 500;
